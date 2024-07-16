@@ -1,9 +1,10 @@
 import "@/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
+import { Bebas_Neue } from "next/font/google";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -11,12 +12,24 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
+const bebas_neue = Bebas_Neue({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: "400",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          bebas_neue.variable,
+        )}
+      >
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
