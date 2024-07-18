@@ -1,5 +1,5 @@
 import type BaseKittenCard from "./cards/_BaseKittenCard";
-import { ExplodingKitten } from "./cards/ExplodingKitten";
+import { type ExplodingKitten } from "./cards/ExplodingKitten";
 
 export class Player {
   name: string;

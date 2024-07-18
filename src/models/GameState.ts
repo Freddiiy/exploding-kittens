@@ -19,7 +19,7 @@ export default class GameState {
     expansions.forEach((exp) => {
       exp.forEach(({ card, amount }) => {
         Array.from(Array(amount).keys()).forEach(() => {
-          this.deck.push(new card());
+          this.deck.push(card);
         });
       });
     });

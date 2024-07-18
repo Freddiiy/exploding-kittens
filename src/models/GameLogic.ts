@@ -2,16 +2,16 @@ import { type Expansion } from "./expansions/_ExpansionInterface";
 import GameState from "./GameState";
 import { Player } from "./Player";
 import { Defuse } from "./cards/Defuse";
-import { type Server } from "socket.io";
+import type EventEmitter from "events";
 
 const MAX_AMOUNT_OF_CARDS = 7;
 const gameIdSet = new Set<string>();
 export class GameLogic {
   gameId: string;
   gameState: GameState;
-  io: Server;
+  io: EventEmitter;
 
-  constructor(io: Server, selectedExpansion: Expansion[]) {
+  constructor(io: EventEmitter, selectedExpansion: Expansion[]) {
     this.gameId = generateGameId(6);
     this.gameState = new GameState(selectedExpansion);
     this.io = io;

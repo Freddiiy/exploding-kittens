@@ -7,7 +7,7 @@ import { Chat } from "./chat";
 export function Messages() {
   const [value, setValue] = useState("");
 
-  const addPost = api.game.add.useMutation({
+  const addPost = api.messages.add.useMutation({
     onSuccess: () => setValue(""),
   });
 
@@ -17,7 +17,6 @@ export function Messages() {
 
   return (
     <div>
-      <Chat />
       <form
         onSubmit={async (e) => {
           e.preventDefault();

@@ -1,5 +1,6 @@
-import GameState from "../GameState";
-import { Player } from "../Player";
+import { z } from "zod";
+import type GameState from "../GameState";
+import { type Player } from "../Player";
 
 export default abstract class BaseKittenCard {
   type: string;
