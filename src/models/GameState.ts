@@ -17,9 +17,9 @@ export default class GameState {
     const expansions = [baseExpansion, ...selectedExpansions];
 
     expansions.forEach((exp) => {
-      exp.forEach(({ card, amount }) => {
+      exp.forEach(({ cardType, amount }) => {
         Array.from(Array(amount).keys()).forEach(() => {
-          this.deck.push(card);
+          this.deck.push(cardType);
         });
       });
     });

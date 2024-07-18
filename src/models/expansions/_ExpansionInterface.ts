@@ -1,9 +1,9 @@
 import { z } from "zod";
-import BaseKittenCard from "../cards/_BaseKittenCard";
+import { OriginalCardsEnum } from "../cards/_CardFactory";
 
 // Define the Zod schema for ExpansionInterfaceCard
 export const ExpansionInterfaceCardSchema = z.object({
-  card: z.custom<BaseKittenCard>((arg) => arg instanceof BaseKittenCard),
+  cardType: z.nativeEnum(OriginalCardsEnum),
   amount: z.number().int().nonnegative(),
 });
 

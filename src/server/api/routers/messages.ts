@@ -23,7 +23,7 @@ export const messagesRouter = createTRPCRouter({
       messages.push({
         id: String(messages.length + 1),
         text: input.text,
-      }); /* [..] add to db */
+      });
       opts.ctx.ee.emit("add", input);
       return input;
     }),
