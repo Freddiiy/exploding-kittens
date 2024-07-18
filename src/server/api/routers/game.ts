@@ -1,32 +1,18 @@
-import { EventEmitter } from "events";
-import { initTRPC } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "../trpc";
+import EventEmitter from "events";
 
 // create a global event emitter (could be replaced by redis, etc)
-const ee = new EventEmitter();
 
-const t = initTRPC.create();
+type Message = { text: string; id?: string };
+const messages: Message[] = [];
 
-export const appRouter = t.router({
-  onAdd: t.procedure.subscription(() => {
-    // return an `observable` with a callback which is triggered immediately
-    return observable<Post>((emit) => {
-      const onAdd = (data: Post) => {
-        // emit data to client
-        emit.next(data);
-      };
-
-      // trigger `onAdd()` when `add` is triggered in our event emitter
-      ee.on("add", onAdd);
-
-      // unsubscribe function when client disconnects or stops subscribing
-      return () => {
-        ee.off("add", onAdd);
-      };
-    });
+export const gameRouter = createTRPCRouter({
+  get: publicProcedure.query(async (opts) => {
+    return messages;
   }),
-  add: t.procedure
+  add: publicProcedure
     .input(
       z.object({
         id: z.string().uuid().optional(),
@@ -34,9 +20,28 @@ export const appRouter = t.router({
       }),
     )
     .mutation(async (opts) => {
-      const post = { ...opts.input }; /* [..] add to db */
-
-      ee.emit("add", post);
-      return post;
+      const input = { ...opts.input }; /* [..] add to db */
+      opts.ctx.ee.emit("add", input);
+      return input;
     }),
+  onAdd: publicProcedure.subscription(({ ctx }) => {
+    // return an `observable` with a callback which is triggered immediately
+    return observable<Message>((emit) => {
+      const onAdd = (data: Message) => {
+        // emit data to client
+        messages.push(data);
+        emit.next(data);
+      };
+
+      // trigger `onAdd()` when `add` is triggered in our event emitter
+      ctx.ee.on("add", onAdd);
+
+      console.log(ctx.ee);
+
+      // unsubscribe function when client disconnects or stops subscribing
+      return () => {
+        ctx.ee.off("add", onAdd);
+      };
+    });
+  }),
 });

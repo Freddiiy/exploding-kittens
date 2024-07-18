@@ -1,13 +1,15 @@
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
-import ws from "ws";
+import { WebSocketServer } from "ws";
+import { appRouter } from "./api/root";
+import { createTRPCContext } from "./api/trpc";
 
-const wss = new ws.Server({
+const wss = new WebSocketServer({
   port: 3001,
 });
 const handler = applyWSSHandler({
   wss,
   router: appRouter,
-  createContext,
+  createContext: createTRPCContext,
   // Enable heartbeat messages to keep connection open (disabled by default)
   keepAlive: {
     enabled: true,

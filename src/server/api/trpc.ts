@@ -13,6 +13,11 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
+import { type CreateWSSContextFnOptions } from "@trpc/server/adapters/ws";
+import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+
+import EventEmitter from "events";
+import { getSession } from "next-auth/react";
 
 /**
  * 1. CONTEXT
@@ -26,12 +31,23 @@ import { db } from "@/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getServerAuthSession();
+
+const ee = new EventEmitter();
+export const createTRPCContext = async (
+  opts:
+    | { headers: Headers }
+    | CreateNextContextOptions
+    | CreateWSSContextFnOptions,
+) => {
+  const session =
+    typeof window === "undefined"
+      ? await getSession(opts as CreateNextContextOptions)
+      : await getServerAuthSession();
 
   return {
     db,
     session,
+    ee,
     ...opts,
   };
 };
