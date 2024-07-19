@@ -2,6 +2,10 @@ import { type Expansion } from "./expansions/_ExpansionInterface";
 import type BaseKittenCard from "./cards/_BaseKittenCard";
 import { type Player } from "./Player";
 import { baseExpansion } from "./expansions/BaseDeck";
+import { KittenCardEnum } from "./cards/_CardFactory";
+import { Defuse } from "./cards/Defuse";
+
+const MAX_AMOUNT_OF_CARDS = 7;
 
 export default class GameState {
   deck: BaseKittenCard[] = [];
@@ -19,7 +23,7 @@ export default class GameState {
     expansions.forEach((exp) => {
       exp.forEach(({ cardType, amount }) => {
         Array.from(Array(amount).keys()).forEach(() => {
-          this.deck.push(cardType);
+          this.deck.push();
         });
       });
     });
@@ -34,6 +38,18 @@ export default class GameState {
       if (this.deck[i] && this.deck[j]) {
         [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
       }
+    });
+  }
+
+  dealCards() {
+    this.players.forEach((p) => {
+      p.handOfCards.push(new Defuse());
+      Array.from(Array(MAX_AMOUNT_OF_CARDS).keys()).forEach(() => {
+        const drawnCard = this.deck.pop();
+        if (drawnCard) {
+          p.handOfCards.push(drawnCard);
+        }
+      });
     });
   }
 }

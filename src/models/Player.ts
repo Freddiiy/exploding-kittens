@@ -2,11 +2,13 @@ import type BaseKittenCard from "./cards/_BaseKittenCard";
 import { type ExplodingKitten } from "./cards/ExplodingKitten";
 
 export class Player {
+  playerId: string;
   name: string;
   character: string;
   handOfCards: BaseKittenCard[] = [];
 
   constructor(name: string, character: string) {
+    this.playerId = "as123123";
     this.name = name;
     this.character = character;
   }

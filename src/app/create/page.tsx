@@ -17,7 +17,15 @@ export default function Page() {
       <AllGames />
       <button
         type="button"
-        onClick={() => createMutation.mutate({ expansions: expansions })}
+        onClick={() =>
+          createMutation.mutate({
+            expansions: expansions,
+            settings: {
+              public: true,
+              name: "Exploding kittens game",
+            },
+          })
+        }
       >
         Create game
       </button>
