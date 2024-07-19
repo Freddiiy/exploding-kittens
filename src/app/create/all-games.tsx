@@ -7,7 +7,9 @@ export function AllGames() {
   return (
     <div>
       {allGames.map((game) => (
-        <p key={game}>{game}</p>
+        <p key={game.gameId}>
+          {game.name} {game.gameId} {game.playerCount}/5
+        </p>
       ))}
     </div>
   );

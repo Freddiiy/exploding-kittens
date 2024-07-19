@@ -3,7 +3,7 @@ import { Rooms } from "./rooms";
 
 export default function Page() {
   return (
-    <div>
+    <div className="mx-auto max-w-screen-lg pt-12">
       <Suspense fallback={"loading..."}>
         <Rooms />
       </Suspense>

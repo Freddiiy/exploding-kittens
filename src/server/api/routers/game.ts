@@ -12,7 +12,17 @@ const activeGames = new Map<string, GameLogic>();
 
 export const gameRouter = createTRPCRouter({
   getAllGames: publicProcedure.query(async () => {
-    return Array.from(activeGames, ([key]) => key);
+    const allGames = Array.from(activeGames, ([key, game]) => {
+      if (!game.gameSettings.private) {
+        return {
+          gameId: key,
+          playerCount: game.gameState.players.length,
+          name: game.gameSettings.name,
+        };
+      }
+    }).filter((game) => game !== undefined);
+
+    return allGames;
   }),
   createGame: publicProcedure
     .input(

@@ -1,10 +1,6 @@
-import Link from "next/link";
-
-import { LatestPost } from "@/app/_components/post";
-import { getServerAuthSession } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
-import { KittenCard } from "@/components/kittens/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function Home() {
   return (
@@ -12,7 +8,7 @@ export default async function Home() {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="max-w-screen-xl">
           <h2 className="text-8xl font-bold">
-            <span className="text-clip bg-gradient-to-t from-red-700 to-yellow-600 bg-clip-text text-transparent">
+            <span className="text-clip bg-gradient-to-t from-red-700 via-red-500 to-yellow-400 bg-clip-text text-transparent">
               EXPLODING
             </span>{" "}
             KITTENS
@@ -23,8 +19,9 @@ export default async function Home() {
               variant={"link"}
               size={"full"}
               className="text-4xl"
+              asChild
             >
-              Play
+              <Link href={"/join"}>Play</Link>
             </Button>
             <Button
               type="button"
