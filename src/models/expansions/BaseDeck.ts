@@ -1,15 +1,18 @@
-import { Defuse } from "../cards/Defuse";
-import { ExplodingKitten } from "../cards/ExplodingKitten";
 import { type Expansion } from "./_ExpansionInterface";
-import { AllCardsTypes, KittenCardEnum } from "../cards/_CardFactory";
+import { AllCardsTypes } from "../cards/_CardFactory";
 
-export const baseExpansion: Expansion = [
+const baseExpansionCards = [
   { cardType: AllCardsTypes.EXPLODING_KITTEN, amount: 4 },
   { cardType: AllCardsTypes.DEFUSE, amount: 6 },
-  //{ card: Skip, amount: 4 },
-  //{ card: Attack, amount: 4 },
-  //{ card: Favor, amount: 4 },
-  //{ card: SeeTheFuture, amount: 4 },
-  //{ card: Shuffle, amount: 4 },
-  //{ card: Nope, amount: 4 },
+  { cardType: AllCardsTypes.SKIP, amount: 4 },
+  { cardType: AllCardsTypes.ATTACK, amount: 4 },
+  { cardType: AllCardsTypes.FAVOR, amount: 4 },
+  { cardType: AllCardsTypes.SEE_THE_FUTURE_3X, amount: 4 },
+  { cardType: AllCardsTypes.SHUFFLE, amount: 4 },
+  { cardType: AllCardsTypes.NOPE, amount: 4 },
 ];
+
+export const baseExpansion: Expansion = {
+  expansionType: "Original",
+  deck: baseExpansionCards,
+};

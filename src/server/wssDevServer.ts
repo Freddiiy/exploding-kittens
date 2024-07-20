@@ -6,6 +6,7 @@ import { createTRPCContext } from "./api/trpc";
 const wss = new WebSocketServer({
   port: 3001,
 });
+
 const handler = applyWSSHandler({
   wss,
   router: appRouter,

@@ -20,9 +20,10 @@ export default class GameState {
   initialize(selectedExpansions: Expansion[]) {
     const expansions = [baseExpansion, ...selectedExpansions];
 
-    expansions.forEach((exp) => {
-      exp.forEach(({ cardType, amount }) => {
+    expansions.forEach((exps) => {
+      exps.deck.forEach(({ cardType, amount }) => {
         Array.from(Array(amount).keys()).forEach(() => {
+          //TODO: ADD CARD FACTORY
           this.deck.push();
         });
       });

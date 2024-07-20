@@ -1,13 +1,13 @@
 import { type Expansion } from "./expansions/_ExpansionInterface";
 import GameState from "./GameState";
-import { Player } from "./Player";
+import { Player, PlayerOptions } from "./Player";
 import { Defuse } from "./cards/Defuse";
 import type EventEmitter from "events";
 import { generateRandomId } from "@/lib/generateRandomId";
 
 interface GameSettings {
-  private: boolean;
-  name: string;
+  public: boolean;
+  name?: string;
 }
 export class GameLogic {
   createAt: Date;
@@ -19,15 +19,18 @@ export class GameLogic {
   constructor(
     io: EventEmitter,
     selectedExpansion: Expansion[],
-    gameSettings: GameSettings = {
-      private: false,
-      name: "An Exploding Kittens Game",
-    },
+    gameSettings: GameSettings,
   ) {
     this.gameId = generateRandomId(8);
     this.gameState = new GameState(selectedExpansion);
     this.io = io;
-    this.gameSettings = gameSettings;
+
+    const _gameSettings: GameSettings = {
+      name: gameSettings.name ?? "A game of Exploding Kittens",
+      public: gameSettings.public ?? true,
+    };
+
+    this.gameSettings = _gameSettings;
     this.createAt = new Date();
   }
 
@@ -39,8 +42,8 @@ export class GameLogic {
     );
   }
 
-  addPlayer(name: string, character: string) {
-    const player = new Player(name, character);
+  addPlayer(opts: PlayerOptions) {
+    const player = new Player(opts);
     this.gameState.players.push(player);
   }
 }
