@@ -1,20 +1,20 @@
 "use client";
 
-import { api } from "@/trpc/react";
-import { useParams } from "next/navigation";
+import { useGame } from "@/components/gameContext";
+import { useSocket } from "@/trpc/socket";
 
 export function AllPlayersList() {
-  const params = useParams();
-  const gameId = params.gameId as string;
-
-  const [players] = api.game.getAllPlayers.useSuspenseQuery({ gameId });
+  const { gameState } = useGame();
+  const { isConnected } = useSocket();
 
   return (
     <div>
-      {players.map((player) => (
-        <div key={player.name} className="flex items-center gap-2">
-          <p>{player.name}</p>
-          <p>as {player.character}</p>
+      <p>Connected: {isConnected ? "TRUE" : "FALSE"}</p>
+      <p>Players:</p>
+      {gameState?.players.map((player) => (
+        <div key={player.username} className="flex items-center gap-2">
+          <p>{player.username}</p>
+          <p>as {player.avatar}</p>
         </div>
       ))}
     </div>

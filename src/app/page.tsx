@@ -20,7 +20,7 @@ export default async function Home() {
             className="text-4xl"
             asChild
           >
-            <Link href={"/join"}>Play</Link>
+            <Link href={"/game"}>Play</Link>
           </Button>
           <Button
             type="button"
@@ -29,7 +29,7 @@ export default async function Home() {
             className="text-4xl"
             asChild
           >
-            <Link href={"/join"}>Join game</Link>
+            <Link href={"/game"}>Join game</Link>
           </Button>
           <Button
             type="button"

@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "prebuild": "prisma generate && prisma migrate deploy",
-    "build:1-next": "cross-env SKIP_ENV_VALIDATION=true NODE_ENV=production next build",
-    "build:2-server": "tsc --project tsconfig.server.json",
-    "build": "run-s build:*",
+    "build": "next build",
     "dev:wss": "cross-env SKIP_ENV_VALIDATION=true PORT=3001 tsx watch src/server/wssDevServer.ts --tsconfig tsconfig.server.json ",
     "dev:next": "next dev",
     "dev": "cross-env SKIP_ENV_VALIDATION=true tsx server.ts",

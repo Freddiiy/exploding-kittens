@@ -1,13 +1,23 @@
-import { ExpansionSchema } from "@/models/expansions/_ExpansionInterface";
-import { playerOtionsSchema } from "@/models/Player";
+import {
+  type Expansion,
+  ExpansionSchema,
+} from "@/models/expansions/_ExpansionInterface";
 import { z } from "zod";
+import { playerOtionsSchema, type PlayerData } from "@/models/Player";
 
 export const createGameSchema = z.object({
   player: playerOtionsSchema,
-  expansions: z.array(ExpansionSchema),
   settings: z.object({
-    public: z.boolean(),
-    name: z.string().optional(),
+    publicGame: z.boolean(),
+    name: z.string(),
+    expansions: z.array(ExpansionSchema),
   }),
 });
-export type CreateGameType = z.infer<typeof createGameSchema>;
+export interface CreateGameType {
+  player: PlayerData;
+  settings: {
+    publicGame: boolean;
+    name: string;
+    expansions: Expansion[];
+  };
+}

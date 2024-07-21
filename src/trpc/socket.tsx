@@ -5,6 +5,7 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -58,4 +59,13 @@ export function SocketProvider({ children }: SocketProviderProps) {
       {children}
     </SocketContext.Provider>
   );
+}
+
+export function useSocket() {
+  const socketCtx = useContext(SocketContext);
+  if (!socketCtx) {
+    throw new Error("useSocket needs to be used inside SocketContext");
+  }
+
+  return socketCtx;
 }

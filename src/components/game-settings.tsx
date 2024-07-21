@@ -42,7 +42,7 @@ export function GameSettings() {
           />
           <FormField
             control={form.control}
-            name="settings.public"
+            name="settings.publicGame"
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between gap-4">

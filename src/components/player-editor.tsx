@@ -21,10 +21,10 @@ import { explodingKittenCharacters } from "@/models/characters";
 import { P } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { type PlayerOptions } from "@/models/Player";
+import { PlayerData } from "@/models/Player";
 
 export function PlayerEditor() {
-  const form = useFormContext<{ player: PlayerOptions }>();
+  const form = useFormContext<{ player: PlayerData }>();
 
   return (
     <Card>
@@ -36,7 +36,7 @@ export function PlayerEditor() {
           <Form {...form}>
             <FormField
               control={form.control}
-              name="player.name"
+              name="player.username"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center gap-4">
@@ -53,7 +53,7 @@ export function PlayerEditor() {
             <div className="flex items-center justify-center gap-16">
               <FormField
                 control={form.control}
-                name="player.character"
+                name="player.avatar"
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger>
@@ -66,7 +66,7 @@ export function PlayerEditor() {
                           }
                         />
                         <AvatarFallback>
-                          {form.watch("player.name")?.at(0) ?? ""}
+                          {form.watch("player.username")?.at(0) ?? ""}
                         </AvatarFallback>
                       </Avatar>
                     </PopoverTrigger>

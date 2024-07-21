@@ -36,7 +36,7 @@ export default class GameState {
   shuffle() {
     this.deck.forEach((_, i) => {
       const j = Math.floor(Math.random() * (i + 1));
-      if (this.deck[i] && this.deck[j]) {
+      if (this.deck[i] !== undefined && this.deck[j] !== undefined) {
         [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
       }
     });

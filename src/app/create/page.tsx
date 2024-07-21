@@ -5,58 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import { type PlayerOptions } from "@/models/Player";
 import {
   createGameSchema,
   type CreateGameType,
 } from "@/server/constants/createGameSchema";
-import useLocalStorage from "@/hooks/useLocalStorage";
-import { generateRandomId } from "@/lib/generateRandomId";
 import { GameSettings } from "../../components/game-settings";
 import { useRouter } from "next/navigation";
 import { H1 } from "@/components/ui/typography";
+import { useUser } from "@/components/user-context";
+import { GAME_ACTIONS } from "@/server/api/handlers/actions";
+import { socket } from "@/trpc/socket";
 
 export default function Page() {
+  const { user, setUser } = useUser();
+
   const utils = api.useUtils();
   const router = useRouter();
-  const createMutation = api.game.createGame.useMutation({
-    onSuccess: async (data) => {
-      await utils.game.getAllGames.invalidate();
-    },
-  });
-
-  const joinGameMutation = api.game.joinGame.useMutation();
-
-  const [localStoragePlayer, setLocalStoragePlayer] =
-    useLocalStorage<PlayerOptions>("player", {
-      playerId: generateRandomId(16),
-      name: "",
-      character: "",
-    });
+  const createMutation = api.game.createGame.useMutation();
 
   const form = useForm<CreateGameType>({
     defaultValues: {
-      player: localStoragePlayer ?? { playerId: generateRandomId(16) },
-      expansions: [],
+      player: user,
       settings: {
+        expansions: [],
         name: "",
-        public: true,
+        publicGame: true,
       },
     },
     resolver: zodResolver(createGameSchema),
   });
 
   const onSubmit: SubmitHandler<CreateGameType> = async (data) => {
-    setLocalStoragePlayer(data.player);
-    const gameId = await createMutation.mutateAsync(data);
-
-    if (gameId) {
-      await joinGameMutation.mutateAsync({
-        player: data.player,
-        gameId,
-      });
-      router.push(`/join/${gameId}`);
-    }
+    setUser(data.player);
+    socket.emit(
+      GAME_ACTIONS.CREATE,
+      { settings: data.settings },
+      (response?: string) => {
+        router.push(`/game/${response}`);
+      },
+    );
   };
 
   return (
@@ -70,7 +57,7 @@ export default function Page() {
             <Button
               size={"lg"}
               className="w-full text-2xl"
-              isLoading={createMutation.isPending || joinGameMutation.isPending}
+              isLoading={form.formState.isSubmitting}
             >
               Create game
             </Button>

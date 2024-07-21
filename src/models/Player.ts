@@ -3,21 +3,24 @@ import type BaseKittenCard from "./cards/_BaseKittenCard";
 import { ExplodingKitten } from "./cards/ExplodingKitten";
 
 export const playerOtionsSchema = z.object({
-  playerId: z.string().min(16).max(16),
-  name: z.string().min(3),
-  character: z.string(),
+  userId: z.string().min(16).max(16),
+  username: z.string().min(3),
+  avatar: z.string(),
 });
-export type PlayerOptions = z.infer<typeof playerOtionsSchema>;
+export interface PlayerData {
+  userId: string;
+  username: string;
+  avatar: string;
+}
+
 export class Player {
-  playerId: string;
-  name: string;
-  character: string;
+  username: string;
+  avatar: string;
   handOfCards: BaseKittenCard[] = [];
 
-  constructor(playerOptions: PlayerOptions) {
-    this.playerId = playerOptions.playerId;
-    this.name = playerOptions.name;
-    this.character = playerOptions.character;
+  constructor(playerOptions: PlayerData) {
+    this.username = playerOptions.username;
+    this.avatar = playerOptions.avatar;
   }
 
   drawCard(deck: ExplodingKitten[]) {
