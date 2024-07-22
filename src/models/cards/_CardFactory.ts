@@ -1,27 +1,14 @@
-export const OriginalCardsEnum = {
-  EXPLODING_KITTEN: "Exploding Kitten",
-  DEFUSE: "Defuse",
-  ATTACK: "Attack",
-  CAT_CARD: "Cat Card",
-  FAVOR: "Favor",
-  NOPE: "Nope",
-  SEE_THE_FUTURE_3X: "See The Future 3x",
-  SHUFFLE: "Shuffle",
-  SKIP: "Skip",
-} as const;
+import { CardType } from "./_CardType";
+import Defuse from "./Defuse";
+import ExplodingKitten from "./ExplodingKitten";
 
-export const AllCardsTypes = {
-  ...OriginalCardsEnum,
-} as const;
-
-export const CatCardsEnum = {
-  BEARD_CAT: "Beard Cat",
-  CATTERMELON: "Cattermelon",
-  HAIRY_POTATO_CAT: "Hairy Potato Cat",
-  RAINBOW_RALPHING_CAT: "Rainbow Ralphing Cat",
-  TACO_CAT: "Taco Cat",
-} as const;
-
-export type CatCardEnum = (typeof CatCardsEnum)[keyof typeof CatCardsEnum];
-
-export type KittenCardEnum = (typeof AllCardsTypes)[keyof typeof AllCardsTypes];
+export class CardFactory {
+  static createCard(type: CardType) {
+    switch (type) {
+      case CardType.EXPLODING_KITTEN:
+        return new ExplodingKitten();
+      case CardType.DEFUSE:
+        return new Defuse();
+    }
+  }
+}

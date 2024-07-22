@@ -2,25 +2,25 @@
 
 import { useUser } from "@/components/user-context";
 import { useSync } from "@/hooks/useSync";
-import type GameState from "@/models/GameState";
-import { GAME_ACTIONS } from "@/server/api/handlers/actions";
-import { joinGameHandler } from "@/server/api/handlers/joinGameHandler";
 import { useParams } from "next/navigation";
 
 import {
   createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
   useContext,
   useEffect,
   useState,
 } from "react";
 import { socket } from "@/trpc/socket";
+import { type Player } from "@/models/Player";
+import { Game } from "@/models/Game";
+import { GAME_ACTIONS } from "@/services/GameService";
 
 interface GameContext {
-  gameState: GameState | undefined;
-  setGameState: Dispatch<SetStateAction<GameState | undefined>>;
+  gameState: Game | undefined;
+  setGameState: Dispatch<SetStateAction<Game | undefined>>;
 }
 const GameContext = createContext<GameContext | null>(null);
 
@@ -29,7 +29,7 @@ interface GameProviderProps {
 }
 export function GameProvider({ children }: GameProviderProps) {
   const [connectedToGame, setConnectedToGame] = useState(false);
-  const [gameState, setGameState] = useState<GameState>();
+  const [players, setPlayers] = useState<Player[]>([]);
 
   const params = useParams();
   const gameId = params.gameId as string;
@@ -48,19 +48,7 @@ export function GameProvider({ children }: GameProviderProps) {
     );
   }
 
-  useEffect(() => {
-    socket.on(GAME_ACTIONS.SYNC, (data: GameState) => setGameState(data));
-
-    return () => {
-      socket.off(GAME_ACTIONS.SYNC, (data: GameState) => setGameState(data));
-    };
-  }, []);
-
-  return (
-    <GameContext.Provider value={{ gameState, setGameState }}>
-      {children}
-    </GameContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function useGame() {

@@ -1,6 +1,5 @@
 import { z } from "zod";
-import type BaseKittenCard from "./cards/_BaseKittenCard";
-import { ExplodingKitten } from "./cards/ExplodingKitten";
+import type BaseCard from "./cards/_BaseCard";
 
 export const playerOtionsSchema = z.object({
   userId: z.string().min(16).max(16),
@@ -14,29 +13,14 @@ export interface PlayerData {
 }
 
 export class Player {
+  userId: string;
   username: string;
   avatar: string;
-  handOfCards: BaseKittenCard[] = [];
+  handOfCards: BaseCard[] = [];
 
   constructor(playerOptions: PlayerData) {
+    this.userId = playerOptions.userId;
     this.username = playerOptions.username;
     this.avatar = playerOptions.avatar;
-  }
-
-  drawCard(deck: ExplodingKitten[]) {
-    if (deck.length > 0) {
-      const drawnCard = deck.pop();
-      if (drawnCard) {
-        this.handOfCards.push(drawnCard);
-        return drawnCard;
-      }
-    }
-  }
-
-  playCard(cardType: string) {
-    const cardIndex = this.handOfCards.findIndex(
-      (card) => card.type === cardType,
-    );
-    return this.handOfCards.splice(cardIndex, 1).at(0);
   }
 }

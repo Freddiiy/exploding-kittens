@@ -1,15 +1,15 @@
 import { type Expansion } from "./_ExpansionInterface";
-import { AllCardsTypes } from "../cards/_CardFactory";
+import { CardType } from "../cards/_CardType";
 
 const baseExpansionCards = [
-  { cardType: AllCardsTypes.EXPLODING_KITTEN, amount: 4 },
-  { cardType: AllCardsTypes.DEFUSE, amount: 6 },
-  { cardType: AllCardsTypes.SKIP, amount: 4 },
-  { cardType: AllCardsTypes.ATTACK, amount: 4 },
-  { cardType: AllCardsTypes.FAVOR, amount: 4 },
-  { cardType: AllCardsTypes.SEE_THE_FUTURE_3X, amount: 4 },
-  { cardType: AllCardsTypes.SHUFFLE, amount: 4 },
-  { cardType: AllCardsTypes.NOPE, amount: 4 },
+  { cardType: CardType.EXPLODING_KITTEN, amount: 4 },
+  { cardType: CardType.DEFUSE, amount: 6 },
+  { cardType: CardType.SKIP, amount: 4 },
+  { cardType: CardType.ATTACK, amount: 4 },
+  { cardType: CardType.FAVOR, amount: 4 },
+  { cardType: CardType.SEE_THE_FUTURE_3X, amount: 4 },
+  { cardType: CardType.SHUFFLE, amount: 4 },
+  { cardType: CardType.NOPE, amount: 4 },
 ];
 
 export const baseExpansion: Expansion = {

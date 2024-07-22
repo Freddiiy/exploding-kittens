@@ -1,6 +1,6 @@
 "use client";
 
-import { GAME_ACTIONS } from "@/server/api/handlers/actions";
+import { GAME_ACTIONS } from "@/services/GameService";
 import { socket } from "@/trpc/socket";
 import { useEffect } from "react";
 

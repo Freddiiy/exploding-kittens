@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OriginalCardsEnum } from "../cards/_CardFactory";
+import { OriginalCardsEnum } from "../cards/_CardType";
 
 // Define the Zod schema for ExpansionInterfaceCard
 export const expansionInterfaceCardSchema = z.object({
