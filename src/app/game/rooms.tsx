@@ -6,10 +6,6 @@ import { api } from "@/trpc/react";
 import Link from "next/link";
 
 export function Rooms() {
-  const [allRooms] = api.game.getAllGames.useSuspenseQuery(undefined, {
-    refetchInterval: 5000,
-  });
-
   return (
     <div className="flex flex-col gap-2 p-4 pt-0">
       {allRooms.map((room) => (

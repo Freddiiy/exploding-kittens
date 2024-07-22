@@ -13,15 +13,14 @@ import { GameSettings } from "../../components/game-settings";
 import { useRouter } from "next/navigation";
 import { H1 } from "@/components/ui/typography";
 import { useUser } from "@/components/user-context";
-import { GAME_ACTIONS } from "@/server/api/handlers/actions";
 import { socket } from "@/trpc/socket";
+import { GAME_ACTIONS } from "@/services/GameService";
 
 export default function Page() {
   const { user, setUser } = useUser();
 
   const utils = api.useUtils();
   const router = useRouter();
-  const createMutation = api.game.createGame.useMutation();
 
   const form = useForm<CreateGameType>({
     defaultValues: {
