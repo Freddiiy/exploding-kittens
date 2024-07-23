@@ -1,16 +1,16 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { CardType } from "@/models/cards/_CardType";
 import Image from "next/image";
 import { type ReactNode, createContext, useContext } from "react";
 
 interface KittenCardProps {
   cardId: string;
-  title: string;
-  subtitle: string;
-  imgSrc: string;
-  icon: string;
+  type: CardType;
+  name: string;
   description: string;
+  mechanics: string;
 }
 
 export function KittenCard({ ...props }: KittenCardProps) {
@@ -22,7 +22,7 @@ export function KittenCard({ ...props }: KittenCardProps) {
             <KittenCardHeader />
             <div className="relative h-96 flex-shrink-0">
               <Image
-                src={props.imgSrc}
+                src={"/characters/angry_devil_cat.png"}
                 alt="Card artwork"
                 fill
                 className="rounded-md"
@@ -45,7 +45,7 @@ function KittenCardHeader({ flipped }: KittenCardHeaderProps) {
     <div className={cn("flex gap-2", flipped && "rotate-180")}>
       <div className="flex-shrink-0">
         <Image
-          src={cardCtx.icon}
+          src={"/placeholder"}
           alt="icon"
           height={50}
           width={50}
@@ -54,11 +54,11 @@ function KittenCardHeader({ flipped }: KittenCardHeaderProps) {
       </div>
       <div className={cn("flex flex-col", flipped && "justify-center")}>
         <h3 className="text-2xl font-medium uppercase tracking-normal">
-          {cardCtx.title}
+          {cardCtx.name}
         </h3>
         {!flipped && (
           <p className="text-base font-thin uppercase leading-4 tracking-wide text-muted-foreground">
-            {cardCtx.subtitle}
+            {cardCtx.description}
           </p>
         )}
       </div>

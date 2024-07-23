@@ -1,4 +1,4 @@
-import { type Game } from "@/models/Game";
+import { type Game } from "@/models/game/Game";
 import { Player } from "@/models/Player";
 
 export interface CardEffect {

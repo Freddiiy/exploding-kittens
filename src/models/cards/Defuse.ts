@@ -1,7 +1,8 @@
-import { type Game } from "../Game";
+import { type Game } from "../game/Game";
 import { type Player } from "../Player";
 import ActionCard from "./_ActionCard";
 import { CardType } from "./_CardType";
+import DefuseEffect from "./cardEffects/DefuseEffect";
 
 export default class Defuse extends ActionCard {
   constructor() {
@@ -18,7 +19,7 @@ export default class Defuse extends ActionCard {
     );
   }
 
-  protected action(game: Game, player: Player): void {
-    throw new Error("Method not implemented.");
+  setUpEffects(): void {
+    this.addEffect(new DefuseEffect());
   }
 }

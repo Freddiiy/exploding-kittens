@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import GameHandler from "@/services/GameService";
+import GameService from "@/services/GameService";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -15,7 +15,7 @@ app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer);
-  new GameHandler(io);
+  new GameService(io);
 
   httpServer.on("error", (err) => {
     console.error(err);

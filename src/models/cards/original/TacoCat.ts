@@ -1,5 +1,5 @@
-import { CardType } from "./_CardType";
-import CatCard from "./_CatCard";
+import { CardType } from "../_CardType";
+import CatCard from "../_CatCard";
 
 export default class TacoCatCard extends CatCard {
   constructor() {

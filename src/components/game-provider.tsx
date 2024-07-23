@@ -1,7 +1,6 @@
 "use client";
 
 import { useUser } from "@/components/user-context";
-import { useSync } from "@/hooks/useSync";
 import { useParams } from "next/navigation";
 
 import {
@@ -15,40 +14,32 @@ import {
 } from "react";
 import { socket } from "@/trpc/socket";
 import { type Player } from "@/models/Player";
-import { Game } from "@/models/Game";
+import { type Game } from "@/models/game/Game";
 import { GAME_ACTIONS } from "@/services/GameService";
+import type Deck from "@/models/Card";
+import { useConnectedToGame } from "@/hooks/useConnectedToGame";
+import { useGameState } from "@/hooks/useGameState";
+import { type PlayerSpecificGameState } from "../services/GameService";
 
 interface GameContext {
-  gameState: Game | undefined;
-  setGameState: Dispatch<SetStateAction<Game | undefined>>;
+  connected: boolean;
+  retryCount: number;
+  gameState: PlayerSpecificGameState | null;
 }
+
 const GameContext = createContext<GameContext | null>(null);
 
 interface GameProviderProps {
   children: ReactNode;
 }
 export function GameProvider({ children }: GameProviderProps) {
-  const [connectedToGame, setConnectedToGame] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([]);
-
-  const params = useParams();
-  const gameId = params.gameId as string;
-  const { user } = useUser();
-
-  if (!connectedToGame) {
-    socket.emit(
-      GAME_ACTIONS.JOIN,
-      {
-        gameId,
-        player: user,
-      },
-      (response?: "connected") => {
-        setConnectedToGame(response === "connected" ?? false);
-      },
-    );
-  }
-
-  return <>{children}</>;
+  const { gameState } = useGameState();
+  const { connected, retryCount } = useConnectedToGame();
+  return (
+    <GameContext.Provider value={{ connected, retryCount, gameState }}>
+      {children}
+    </GameContext.Provider>
+  );
 }
 
 export function useGame() {
@@ -58,4 +49,10 @@ export function useGame() {
   }
 
   return gameCtx;
+}
+
+export function useGameId() {
+  const params = useParams();
+  const gameId = params.gameId as string;
+  return gameId;
 }

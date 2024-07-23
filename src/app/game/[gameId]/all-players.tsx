@@ -1,6 +1,6 @@
 "use client";
 
-import { useGame } from "@/components/gameContext";
+import { useGame } from "@/components/game-provider";
 import { useSocket } from "@/trpc/socket";
 
 export function AllPlayersList() {

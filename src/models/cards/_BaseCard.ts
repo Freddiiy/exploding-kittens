@@ -1,5 +1,5 @@
 import { generateRandomId } from "@/lib/generateRandomId";
-import { type Game } from "../Game";
+import { type Game } from "../game/Game";
 import { type Player } from "../Player";
 import { type CardType } from "./_CardType";
 
@@ -41,11 +41,19 @@ export default abstract class BaseCard {
   abstract play(game: Game, player: Player): void;
 
   toJSON() {
-    return {
+    const cardJSON: BaseCardJSON = {
       id: this.id,
       type: this.type,
       name: this.name,
       description: this.description,
     };
+    return cardJSON;
   }
 }
+
+export type BaseCardJSON = {
+  id: string;
+  type: CardType;
+  name: string;
+  description: string;
+};

@@ -1,4 +1,4 @@
-import { type Game } from "../Game";
+import { type Game } from "../game/Game";
 import { type Player } from "../Player";
 import BaseCard from "./_BaseCard";
 import { type CardEffect } from "./cardEffects/CardEffect";
@@ -13,6 +13,7 @@ export default abstract class ActionCard extends BaseCard {
     mechanics: string,
   ) {
     super(type, name, description, mechanics);
+    this.setUpEffects();
   }
 
   addEffect(effect: CardEffect) {
@@ -20,10 +21,10 @@ export default abstract class ActionCard extends BaseCard {
   }
 
   play(game: Game, player: Player) {
-    this.action(game, player);
+    for (const effect of this.effects) {
+      effect.apply(game, player);
+    }
   }
 
-  protected beforeAction(game: Game, player: Player): void {}
-  protected abstract action(game: Game, player: Player): void;
-  protected afterAction(game: Game, player: Player): void {}
+  abstract setUpEffects(): void;
 }

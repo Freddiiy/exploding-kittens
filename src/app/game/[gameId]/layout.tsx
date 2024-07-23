@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { SocketProvider } from "@/trpc/socket";
-import { GameProvider } from "@/components/gameContext";
+import { GameProvider } from "@/components/game-provider";
 
 export const metadata: Metadata = {
   title: "Exploding Kittens",
