@@ -17,7 +17,7 @@ export default class TurnManager {
       const j = Math.floor(Math.random() * (i + 1));
 
       //Null pointer assertion. Is it safe? Dunno.
-      [this.playerOrder[i]!, this.playerOrder[j]!] = [
+      [this.playerOrder[i], this.playerOrder[j]] = [
         this.playerOrder[j]!,
         this.playerOrder[i]!,
       ];

@@ -1,11 +1,12 @@
 import { type Player } from "../Player";
 
 export default class PlayerManager {
-  private players: Player[] = [];
+  private players: Player[];
   private maxPlayers;
   private disconnectedPlayers: Map<string, Player> = new Map();
 
   constructor(maxPlayers: number = 5) {
+    this.players = [];
     this.maxPlayers = maxPlayers;
   }
 
@@ -39,8 +40,14 @@ export default class PlayerManager {
     const player = this.players.find((p) => p.getId() === playerId);
     if (player) {
       this.players = this.players.filter((p) => p.getId() !== playerId);
-      this.disconnectedPlayers.set(playerId, player);
+      this.disconnectedPlayers.set(player.getId(), player);
     }
+
+    console.log("current player: ", player?.getUsername() ?? "unknown");
+    console.log(
+      "disconnected players: ",
+      Array.from(this.disconnectedPlayers.values()),
+    );
   }
 
   reconnectPlayer(playerId: string, newSocketId: string) {

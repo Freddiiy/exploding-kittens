@@ -1,8 +1,8 @@
-import Deck from "@/models/Card";
-import BaseCard, { BaseCardJSON } from "@/models/cards/_BaseCard";
-import { Expansion } from "@/models/expansions/_ExpansionInterface";
-import { Game, GameStatus, type GameSettings } from "@/models/game/Game";
+import { type BaseCardJSON } from "@/models/cards/_BaseCard";
+import { type Expansion } from "@/models/expansions/_ExpansionInterface";
+import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
 import { Player, type PlayerData } from "@/models/Player";
+import { socket } from "@/trpc/socket";
 import { type Server, type Socket } from "socket.io";
 
 export default class GameService {
@@ -13,15 +13,34 @@ export default class GameService {
     this.io = io;
     this.socketHandler();
   }
-
-  private socketHandler() {
+  socketHandler() {
     this.io.on("connection", (socket) => {
       this.handleCreateGame(socket);
       this.handleJoinGame(socket);
-      this.handleRejoinGame(socket);
+      this.handleGetSync(socket);
+      this.handleGetRooms(socket);
 
       socket.on("disconnect", () => {
-        console.log(`Disconnected: ${socket.id}`);
+        console.log("PLAYER DISCONNECTED");
+        const game = Array.from(this.games.values()).find((x) =>
+          x
+            .getPlayerManager()
+            .getPlayers()
+            .find((p) => p.getSocketId() === socket.id),
+        );
+
+        if (game) {
+          const player = game
+            .getPlayerManager()
+            .getPlayers()
+            .find((x) => x.getSocketId() === socket.id);
+
+          if (player) {
+            console.log(player.getUsername() + " disconnected");
+            game.disconnectPlayer(player.getId());
+            this.sendGameState(game.getId());
+          }
+        }
       });
     });
   }
@@ -46,62 +65,57 @@ export default class GameService {
       async ({ gameId, player }: JoinGameHandler, callback) => {
         const game = this.getGame(gameId);
 
-        if (
-          game
-            .getPlayerManager()
-            .getPlayers()
-            .every((p) => p.getId() !== player.userId)
-        ) {
+        const currentPlayer = game
+          .getPlayerManager()
+          .getPlayers()
+          .find((p) => p.getId() === player.userId);
+
+        console.log("join game run");
+        if (currentPlayer) {
+          console.log("current player confirmed");
+          game.reconnectPlayer(currentPlayer.getId(), socket.id);
+        } else {
+          console.log("not current player");
           const newPlayer = new Player(player);
           newPlayer.setSocketId(socket.id);
           game.addPlayer(newPlayer);
         }
-        socket.join(gameId);
-
-        console.log(
-          "AMOUNT OF PLAYRES: ",
-          game.getPlayerManager().getPlayers().length,
-        );
 
         callback?.("connected");
-        socket.in(gameId).emit(GAME_ACTIONS.SYNC, game);
+        this.sendGameState(gameId);
       },
     );
   }
 
-  private handleRejoinGame(socket: Socket) {
-    socket.on(
-      GAME_ACTIONS.REJOIN,
-      async ({ userId, gameId }: RejoinGameHandler) => {
-        const gameExists = this.games.has(gameId);
-        if (!gameExists) return;
+  private handleGetSync(socket: Socket) {
+    socket.on(GAME_ACTIONS.GET_SYNC, async (gameId: string, callback) => {
+      if (!this.games.has(gameId)) {
+        callback?.("notFound");
+      }
+      this.sendGameState(gameId);
+    });
+  }
 
-        const game = this.getGame(gameId);
+  ROOMS_CHANNEL = "rooms-channel";
 
-        const currentPlayer = game
-          .getPlayerManager()
-          .getPlayers()
-          .find((p) => p.getId() === userId);
-
-        if (!currentPlayer) return;
-
-        game;
-
-        socket.join(gameId);
-
-        const rejoinData: RejoinData = {
-          userId,
-          settings: {
-            publicGame: game.isPublic(),
+  private handleGetRooms(socket: Socket) {
+    socket.on(GAME_ACTIONS.GET_ROOMS, async () => {
+      const allGames = Array.from(this.games.values())
+        .filter((game) => game.isPublic() && game.getStatus() === "waiting")
+        .map((game) => {
+          const rooms: Room = {
+            createdAt: game.getCreatedAt(),
+            gameId: game.getId(),
+            playerCount: game.getPlayerManager().getPlayers().length,
+            maxPlayers: game.getPlayerManager().getMaxPlayers(),
             name: game.getName(),
-            expansions: game.getExpansions(),
-          },
-          players: game.getPlayerManager().getPlayers(),
-        };
+          };
+          return rooms;
+        })
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-        socket.in(gameId).emit(GAME_ACTIONS.REJOIN_DATA, rejoinData);
-      },
-    );
+      socket.emit(GAME_ACTIONS.ROOMS, allGames);
+    });
   }
 
   private sendGameState(gameId: string) {
@@ -112,17 +126,13 @@ export default class GameService {
 
     const baseGameState: GameState = {
       id: game.getId(),
-      players: players.map((player) => {
-        const playerClient: PlayerClient = {
-          id: player.getId(),
-          username: player.getUsername(),
-          avatar: player.getAvatar(),
-          handSize: player.getHandOfCard().length,
-          isCurrentTurn: game.isPlayersTurn(player),
-        };
-
-        return playerClient;
-      }),
+      players: players.map((player) => ({
+        id: player.getId(),
+        username: player.getUsername(),
+        avatar: player.getAvatar(),
+        handSize: player.getHandOfCard().length,
+        isCurrentTurn: game.isPlayersTurn(player),
+      })),
       currentPlayerId: currentPlayer?.getId() ?? null,
       deckSize: game.getDeckManger().getDeckSize(),
       discardPile: game
@@ -142,7 +152,13 @@ export default class GameService {
      * peek at the gameState.
      */
 
+    let defaultSend = true;
+
     players.forEach((player) => {
+      if (player.getSocketId() === socket.id) {
+        defaultSend = false;
+      }
+
       const playerSocketId = player.getSocketId();
       if (playerSocketId) {
         const playerSocket = this.io.sockets.sockets.get(playerSocketId);
@@ -159,6 +175,10 @@ export default class GameService {
         }
       }
     });
+
+    if (defaultSend) {
+      this.io.emit(GAME_ACTIONS.SYNC, baseGameState);
+    }
   }
 
   private getGame(gameId: string) {
@@ -200,11 +220,19 @@ export const GAME_ACTIONS = {
   JOIN: "join",
   REJOIN: "rejoin",
   REJOIN_DATA: "rejoinData",
+  DISCONNECT: "disconnectGame",
+  GET_SYNC: "getSync",
   SYNC: "sync",
+  ROOMS: "rooms",
+  GET_ROOMS: "getRooms",
 };
 
 export interface CreateGameHandler {
   settings: GameSettings;
+}
+
+export interface GameHandler {
+  gameId: string;
 }
 
 export interface JoinGameHandler {
@@ -212,13 +240,21 @@ export interface JoinGameHandler {
   player: PlayerData;
 }
 
-interface RejoinGameHandler {
+export interface RejoinGameHandler {
   userId: string;
   gameId: string;
 }
 
-interface RejoinData {
+export interface RejoinData {
   userId: string;
   settings: GameSettings;
   players: Player[];
+}
+
+export interface Room {
+  createdAt: Date;
+  gameId: string;
+  playerCount: number;
+  maxPlayers: number;
+  name: string;
 }

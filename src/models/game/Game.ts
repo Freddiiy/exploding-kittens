@@ -13,7 +13,7 @@ export interface GameSettings {
 
 export type GameStatus = "waiting" | "inProgress" | "ended";
 export class Game {
-  private createAt: Date;
+  private createdAt: Date;
 
   private id: string;
 
@@ -36,7 +36,7 @@ export class Game {
     this.turnManager = new TurnManager();
 
     this.id = generateRandomId(8);
-    this.createAt = new Date();
+    this.createdAt = new Date();
   }
 
   startGame() {
@@ -140,5 +140,9 @@ export class Game {
 
   getTurnManger() {
     return this.turnManager;
+  }
+
+  getCreatedAt() {
+    return this.createdAt;
   }
 }

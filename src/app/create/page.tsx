@@ -19,7 +19,6 @@ import { GAME_ACTIONS } from "@/services/GameService";
 export default function Page() {
   const { user, setUser } = useUser();
 
-  const utils = api.useUtils();
   const router = useRouter();
 
   const form = useForm<CreateGameType>({

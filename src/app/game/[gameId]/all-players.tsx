@@ -4,11 +4,20 @@ import { useGame } from "@/components/game-provider";
 import { useSocket } from "@/trpc/socket";
 
 export function AllPlayersList() {
-  const { gameState } = useGame();
+  const { gameState, gameStatus } = useGame();
   const { isConnected } = useSocket();
+
+  if (gameStatus === "notFound") {
+    return <div>No game found</div>;
+  }
+
+  if (!gameState) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
+      <p>{JSON.stringify(gameState, null, 2)}</p>
       <p>Connected: {isConnected ? "TRUE" : "FALSE"}</p>
       <p>Players:</p>
       {gameState?.players.map((player) => (

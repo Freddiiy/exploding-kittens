@@ -13,9 +13,8 @@ const handler = app.getRequestHandler();
 app.prepare().then(() => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const httpServer = createServer(handler);
-
   const io = new Server(httpServer);
-  new GameService(io);
+  const gameService = new GameService(io);
 
   httpServer.on("error", (err) => {
     console.error(err);
