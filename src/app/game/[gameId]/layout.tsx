@@ -1,5 +1,4 @@
 import { type Metadata } from "next";
-import { SocketProvider } from "@/trpc/socket";
 import { GameProvider } from "@/components/game-provider";
 
 export const metadata: Metadata = {
@@ -11,7 +10,5 @@ export const metadata: Metadata = {
 export default function GameLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-      <GameProvider>{children}</GameProvider>
-  );
+  return <GameProvider>{children}</GameProvider>;
 }
