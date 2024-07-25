@@ -42,18 +42,20 @@ export default abstract class BaseCard {
 
   toJSON() {
     const cardJSON: BaseCardJSON = {
-      id: this.id,
+      cardId: this.id,
       type: this.type,
       name: this.name,
       description: this.description,
+      mechanics: this.mechanics,
     };
     return cardJSON;
   }
 }
 
 export type BaseCardJSON = {
-  id: string;
+  cardId: string;
   type: CardType;
   name: string;
   description: string;
+  mechanics: string;
 };

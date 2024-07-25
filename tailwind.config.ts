@@ -22,6 +22,11 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
+      spacing: {
+        "card-width": `var(--card-width)`,
+        "card-height": `var(--card-height)`,
+        "card-x-overlap": `var(--card-x-overlap)`,
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

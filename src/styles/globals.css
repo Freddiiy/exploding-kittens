@@ -29,6 +29,17 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Card calculations */
+    --og-card-width: 63mm;
+    --og-card-height: 88mm;
+    --card-scale-factor: 0.8;
+    --card-width: calc(
+      calc(var(--og-card-width) * 1.3) * var(--card-scale-factor)
+    );
+    --card-height: calc(
+      calc(var(--og-card-height) * 1.3) * var(--card-scale-factor)
+    );
   }
 
   .dark {

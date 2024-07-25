@@ -9,6 +9,6 @@ export class ForceNextPlayerExtraTurnEffect implements CardEffect {
     this.turns = turns;
   }
   apply(game: Game, player: Player): void {
-    game.getTurnManger();
+    game.getTurnManger().addTurnsToNextPlayer(2);
   }
 }
