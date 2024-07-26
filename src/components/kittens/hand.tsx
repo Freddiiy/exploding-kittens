@@ -27,7 +27,9 @@ export function Hand(props: HandProps) {
   }, []);
 
   useEffect(() => {
-    setHoveredCardId(null);
+    if (!isDragActive) {
+      setHoveredCardId(null);
+    }
   }, [isDragActive]);
 
   function angle(i: number) {
@@ -60,7 +62,7 @@ export function Hand(props: HandProps) {
         const animate = {
           x,
           y,
-          rotate: isHovered ? 0 : `${angle(i)}rad`,
+          rotate: `${angle(i)}rad`,
 
           opacity: isHovered ? 0 : 1,
         };
@@ -77,20 +79,16 @@ export function Hand(props: HandProps) {
               setHoveredCardPosition({ x, y });
             }}
             onHoverEnd={() => setHoveredCardId(null)}
-            onMouseEnter={() => {
-              setHoveredCardId(card.cardId);
-              setHoveredCardPosition({ x, y });
-            }}
-            onMouseLeave={() => setHoveredCardId(null)}
           >
             <KittenCard card={card} />
           </motion.div>
         );
       })}
       {/* Preview layer */}
-      <AnimatePresence>
+      <AnimatePresence key={hoveredCardId}>
         {hoveredCardId && !isDragActive && (
           <motion.div
+            key={hoveredCard.cardId}
             initial={{
               x: hoveredCardPosition.x,
               y: -20,
@@ -109,7 +107,6 @@ export function Hand(props: HandProps) {
             className="pointer-events-none absolute"
             style={{ zIndex: 10 }}
           >
-            <div>{hoveredCardId}</div>
             <KittenCardCard card={hoveredCard} disabled={true} />
           </motion.div>
         )}

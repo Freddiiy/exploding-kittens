@@ -46,23 +46,25 @@ export default class PlayerManager {
       this.players = this.players.filter((p) => p.getId() !== playerId);
       this.disconnectedPlayers.set(player.getId(), player);
     }
-
-    console.log("current player: ", player?.getUsername() ?? "unknown");
-    console.log(
-      "disconnected players: ",
-      Array.from(this.disconnectedPlayers.values()),
-    );
   }
 
   reconnectPlayer(playerId: string, newSocketId: string) {
-    const player = this.disconnectedPlayers.get(playerId);
+    let player = this.disconnectedPlayers.get(playerId);
     if (player) {
       player.setSocketId(newSocketId);
       this.players.push(player);
       this.disconnectedPlayers.delete(playerId);
       return player;
     }
-    return null;
+
+    player = this.players.find((p) => p.getId() === playerId);
+    if (player) {
+      player.setSocketId(newSocketId);
+    } else {
+      return null;
+    }
+
+    return player;
   }
 
   isPlayerDisconnected(playerId: string): boolean {

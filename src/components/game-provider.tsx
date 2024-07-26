@@ -17,20 +17,22 @@ import { type Player } from "@/models/Player";
 import { GameStatus, type Game } from "@/models/game/Game";
 import {
   GAME_ACTIONS,
+  GameState,
   type GameHandler,
   type JoinGameHandler,
   type RejoinGameHandler,
 } from "@/services/GameService";
 import type Deck from "@/models/Card";
 
-import { type PlayerSpecificGameState } from "../services/GameService";
+import { type PlayerState } from "../services/GameService";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
 interface GameContext {
   connected: boolean;
   retryCount: number;
-  gameState: PlayerSpecificGameState | null;
+  gameState: GameState | null;
   gameStatus: GameStatus | "notFound";
+  playerState: PlayerState | null;
 }
 
 const GameContext = createContext<GameContext | null>(null);
@@ -46,30 +48,13 @@ export function GameProvider({ children }: GameProviderProps) {
     "waiting",
   );
 
-  const [gameState, setGameState] = useState<PlayerSpecificGameState | null>(
-    null,
-  );
-  useEffect(() => {
-    socket.emit(GAME_ACTIONS.GET_SYNC, gameId, (response?: GameStatus) => {
-      if (response) {
-        setGameStatus(response);
-      }
-    });
-    socket.on(GAME_ACTIONS.SYNC, (gameState: PlayerSpecificGameState) => {
-      setGameState(gameState);
-    });
+  const [playerState, setPlayerState] = useState<PlayerState | null>(null);
 
-    return () => {
-      socket.off(GAME_ACTIONS.SYNC, (gameState: PlayerSpecificGameState) =>
-        setGameState(gameState),
-      );
-    };
-  }, [gameId]);
+  const [gameState, setGameState] = useState<GameState | null>(null);
 
   const { user } = useUser();
 
   useEffect(() => {
-    if (!gameState) return;
     const attemptConnection = () => {
       if (!connected) {
         const joinHandlerObj: JoinGameHandler = {
@@ -97,9 +82,35 @@ export function GameProvider({ children }: GameProviderProps) {
       return () => clearTimeout(timer);
     }
   }, [connected, gameId, gameState, retryCount, user]);
+
+  useEffect(() => {
+    if (connected) {
+      socket.emit(GAME_ACTIONS.GET_SYNC, gameId, (response?: GameStatus) => {
+        if (response) {
+          setGameStatus(response);
+        }
+      });
+
+      socket.on(GAME_ACTIONS.SYNC, (gameState: GameState) => {
+        setGameState(gameState);
+        setGameStatus(gameState.status);
+      });
+
+      socket.on(GAME_ACTIONS.PLAYER_SYNC, (playerState: PlayerState) => {
+        setPlayerState(playerState);
+      });
+
+      return () => {
+        socket.off(GAME_ACTIONS.SYNC, (gameState: GameState) => {
+          setGameState(gameState);
+          setGameStatus(gameState.status);
+        });
+      };
+    }
+  }, [gameId, connected]);
   return (
     <GameContext.Provider
-      value={{ connected, retryCount, gameState, gameStatus }}
+      value={{ connected, retryCount, gameState, gameStatus, playerState }}
     >
       {children}
     </GameContext.Provider>

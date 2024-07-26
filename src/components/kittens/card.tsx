@@ -25,6 +25,7 @@ import { createPortal } from "react-dom";
 import { BaseCardJSON } from "@/models/cards/_BaseCard";
 import { explodingKittenCharacters } from "@/models/characters";
 import { P } from "../ui/typography";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
 
 interface KittenCardProps {
   cardId: string;
@@ -83,43 +84,76 @@ export function KittenCardCard({ card, disabled }: KittenCardFullProps) {
   }, [isDragActive, controls]);
 
   return (
-    <motion.div
-      animate={controls}
-      transition={{ duration: 0.1 }}
-      whileHover={{ scale: 1.2 }}
-    >
+    <motion.div animate={controls}>
       <KittenCardSkeleton card={card} disabled={disabled} />
     </motion.div>
   );
 }
 
 export function KittenCardSkeleton({ card, disabled }: KittenCardFullProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
   return (
     <KittenCardContext.Provider value={{ card: card, disabled }}>
-      <div className="pointer-events-none relative h-card-height w-card-width">
-        <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border-2 border-black bg-foreground">
-          <KittenCardHeader />
+      <motion.div
+        onClick={() => setIsFlipped((prev) => !prev)}
+        className="relative h-card-height w-card-width"
+        style={{ transformStyle: "preserve-3d" }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          <KittenCardContent />
+        </motion.div>
+        <motion.div
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          style={{ backfaceVisibility: "hidden", transform: `rotateY(180deg)` }}
+        >
+          <KittenCardBackface />
+        </motion.div>
+      </motion.div>
+    </KittenCardContext.Provider>
+  );
+}
 
-          <div className="relative m-2 min-h-[60%] flex-grow overflow-hidden rounded-lg">
-            <Image
-              src={
-                explodingKittenCharacters.find(
-                  (x) => x.name.toLowerCase() === "angry devil cat",
-                )!.img
-              }
-              alt={card.name}
-              layout="fill"
-              objectFit="cover"
-            />
-            <div className="justify-centerpx-4 absolute inset-x-0 bottom-4 mx-auto flex w-full px-2">
-              <div className="rounded-xl bg-muted/60 p-2">
-                <P className="text-xs text-white">{card.mechanics}</P>
-              </div>
-            </div>
+export function KittenCardContent() {
+  const { card } = useKittenCard();
+  return (
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border-2 border-black bg-white">
+      <KittenCardHeader />
+      <div className="relative m-2 min-h-[60%] flex-grow overflow-hidden rounded-lg">
+        <Image
+          src={
+            explodingKittenCharacters.find(
+              (x) => x.name.toLowerCase() === "angry devil cat",
+            )!.img
+          }
+          alt={card.name}
+          layout="fill"
+          objectFit="cover"
+        />
+        <div className="justify-centerpx-4 absolute inset-x-0 bottom-4 mx-auto flex w-full px-2">
+          <div className="rounded-xl bg-muted/80 p-2">
+            <P className="text-xs text-white">{card.mechanics}</P>
           </div>
         </div>
       </div>
-    </KittenCardContext.Provider>
+    </div>
+  );
+}
+
+export function KittenCardBackface() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center -space-y-2 overflow-hidden rounded-xl border-2 border-black bg-red-900">
+      <h2 className="text-4xl font-bold">
+        <span className="text-clip bg-gradient-to-t from-red-800 via-red-500 to-yellow-300 bg-clip-text text-transparent">
+          EXPLODING
+        </span>
+      </h2>
+      <h2 className="text-5xl font-bold text-white">KITTENS</h2>
+    </div>
   );
 }
 
@@ -147,7 +181,9 @@ function KittenCardDragOverlay({ card, children }: KittenCardDragOverlayProps) {
   }
 
   return createPortal(
-    <DragOverlay>{active ? children : null}</DragOverlay>,
+    <DragOverlay modifiers={[snapCenterToCursor]}>
+      {active ? children : null}
+    </DragOverlay>,
     document.body,
   );
 }

@@ -1,4 +1,5 @@
 import type BaseCard from "../cards/_BaseCard";
+import { CardFactory } from "../cards/_CardFactory";
 import Defuse from "../cards/Defuse";
 import ExplodingKitten from "../cards/ExplodingKitten";
 import { type Expansion } from "../expansions/_ExpansionInterface";
@@ -11,13 +12,11 @@ export default class DeckManger {
   private discardPile: BaseCard[] = [];
 
   initDeck(expansions: Expansion[]) {
-    const _expansions = [baseExpansion, ...expansions];
-
-    _expansions.forEach((exps) => {
+    expansions.forEach((exps) => {
       exps.deck.forEach(({ cardType, amount }) => {
         Array.from(Array(amount).keys()).forEach(() => {
-          //TODO: ADD CARD FACTORY
-          this.deck.push();
+          const newCard = CardFactory.createCard(cardType);
+          this.deck.push(newCard);
         });
       });
     });
@@ -72,6 +71,10 @@ export default class DeckManger {
   }
 
   getDiscardPile() {
-    return this.discardPile;
+    return [...this.discardPile];
+  }
+
+  addToDiscardPile(card: BaseCard) {
+    this.discardPile.push(card);
   }
 }

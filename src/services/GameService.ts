@@ -1,8 +1,9 @@
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
+import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
 import { Player, type PlayerData } from "@/models/Player";
-import { socket } from "@/trpc/socket";
+
 import { type Server, type Socket } from "socket.io";
 
 export default class GameService {
@@ -20,6 +21,8 @@ export default class GameService {
       this.handleGetSync(socket);
       this.handleGetRooms(socket);
       this.handlePlayCard(socket);
+      this.handleDrawCard(socket);
+      this.handleStartGame(socket);
 
       socket.on("disconnect", () => {
         console.log("PLAYER DISCONNECTED");
@@ -49,7 +52,7 @@ export default class GameService {
   private handlePlayCard(socket: Socket) {
     socket.on(
       GAME_ACTIONS.PLAY_CARD,
-      async ({ gameId, playerId, cardId }: PlayCardHadler) => {
+      async ({ gameId, playerId, cardId }: PlayCardHandler) => {
         try {
           const game = this.getGame(gameId);
           const currentPlayer = game.getPlayerManager().getPlayerById(playerId);
@@ -69,6 +72,45 @@ export default class GameService {
           }
 
           await game.playCard(currentPlayer, card);
+
+          currentPlayer.removeCardFromHand(cardId);
+
+          game.getDeckManger().addToDiscardPile(card);
+          this.sendGameState(game.getId());
+        } catch (error) {
+          const err = error as Error;
+          socket.emit(GAME_ACTIONS.ERROR, { message: err.message });
+        }
+      },
+    );
+  }
+
+  private handleDrawCard(socket: Socket) {
+    socket.on(
+      GAME_ACTIONS.DRAW_CARD,
+      async ({ gameId, playerId }: DrawCardHandler) => {
+        try {
+          const game = this.getGame(gameId);
+          const currentPlayer = game.getPlayerManager().getPlayerById(playerId);
+
+          if (!currentPlayer) {
+            throw new Error("Player not found.");
+          }
+
+          if (!game.isPlayersTurn(currentPlayer)) {
+            console.log("IS MY TURN: ", game.isPlayersTurn(currentPlayer));
+            throw new Error("it's not your turn.");
+          }
+
+          const card = game.getDeckManger().drawCard();
+
+          if (!card) {
+            throw new Error("No more cards in the deck");
+          }
+
+          currentPlayer.addCardToHand(card);
+          game.getTurnManger().endTurn(game.getPlayerManager().getPlayers());
+          this.sendGameState(game.getId());
         } catch (error) {
           const err = error as Error;
           socket.emit(GAME_ACTIONS.ERROR, { message: err.message });
@@ -84,9 +126,39 @@ export default class GameService {
         if (!settings.name) {
           settings.name = "An game of Exploding Kittens";
         }
+
+        settings.expansions = [baseExpansion];
+
         const game = new Game(settings);
         this.games.set(game.getId(), game);
         callback?.(game.getId());
+      },
+    );
+  }
+
+  private handleStartGame(socket: Socket) {
+    socket.on(
+      GAME_ACTIONS.START_GAME,
+      ({ gameId, playerId }: StartGameHandler) => {
+        try {
+          const game = this.getGame(gameId);
+
+          if (!game.isPlayerGameHost(playerId)) {
+            throw new Error("You don't have permission to start the game");
+          }
+
+          // Check if there are enough players
+          if (game.getPlayerManager().getPlayers().length < 2) {
+            throw new Error("Not enough players to start the game");
+          }
+
+          game.startGame();
+
+          this.sendGameState(gameId);
+        } catch (error) {
+          const err = error as Error;
+          socket.emit(GAME_ACTIONS.ERROR, { message: err.message });
+        }
       },
     );
   }
@@ -97,21 +169,19 @@ export default class GameService {
       async ({ gameId, player }: JoinGameHandler, callback) => {
         const game = this.getGame(gameId);
 
-        const currentPlayer = game
+        const isDisconnected = game
           .getPlayerManager()
-          .getPlayers()
-          .find((p) => p.getId() === player.userId);
+          .isPlayerDisconnected(player.userId);
 
-        if (currentPlayer) {
-          console.log("current player confirmed");
-          game.reconnectPlayer(currentPlayer.getId(), socket.id);
+        if (isDisconnected) {
+          game.reconnectPlayer(player.userId, socket.id);
         } else {
-          console.log("not current player");
           const newPlayer = new Player(player);
           newPlayer.setSocketId(socket.id);
           game.addPlayer(newPlayer);
         }
 
+        socket.join(gameId);
         callback?.("connected");
         this.sendGameState(gameId);
       },
@@ -175,6 +245,7 @@ export default class GameService {
       expansionsInPlay: game.getExpansions(),
     };
 
+    this.io.to(gameId).emit(GAME_ACTIONS.SYNC, baseGameState);
     /**
      * Here we split each players state up in personalized chuncks so we don't share
      * "sensitive" game states like what cards they have on their hands and so on.
@@ -183,33 +254,22 @@ export default class GameService {
      * peek at the gameState.
      */
 
-    let defaultSend = true;
-
     players.forEach((player) => {
-      if (player.getSocketId() === socket.id) {
-        defaultSend = false;
-      }
-
       const playerSocketId = player.getSocketId();
       if (playerSocketId) {
         const playerSocket = this.io.sockets.sockets.get(playerSocketId);
         if (playerSocket) {
-          const playerState: PlayerSpecificGameState = {
-            ...baseGameState,
+          const playerState: PlayerState = {
             playerHandOfCards: player
               .getHandOfCard()
               .map((card) => card.toJSON()),
             isPlayersTurn: game.isPlayersTurn(player),
           };
 
-          playerSocket.emit(GAME_ACTIONS.SYNC, playerState);
+          playerSocket.to(gameId).emit(GAME_ACTIONS.PLAYER_SYNC, playerState);
         }
       }
     });
-
-    if (defaultSend) {
-      this.io.emit(GAME_ACTIONS.SYNC, baseGameState);
-    }
   }
 
   private getGame(gameId: string) {
@@ -223,7 +283,17 @@ export default class GameService {
   }
 }
 
-export interface PlayCardHadler {
+export interface StartGameHandler {
+  gameId: string;
+  playerId: string;
+}
+
+export interface DrawCardHandler {
+  gameId: string;
+  playerId: string;
+}
+
+export interface PlayCardHandler {
   gameId: string;
   playerId: string;
   cardId: string;
@@ -247,20 +317,23 @@ export interface GameState {
   discardPile: BaseCardJSON[];
 }
 
-export interface PlayerSpecificGameState extends GameState {
+export interface PlayerState {
   playerHandOfCards: BaseCardJSON[];
   isPlayersTurn: boolean;
 }
 
 export const GAME_ACTIONS = {
   PLAY_CARD: "playCard",
+  DRAW_CARD: "drawCard",
   CREATE: "create",
+  START_GAME: "startGame",
   JOIN: "join",
   REJOIN: "rejoin",
   REJOIN_DATA: "rejoinData",
   DISCONNECT: "disconnectGame",
   GET_SYNC: "getSync",
   SYNC: "sync",
+  PLAYER_SYNC: "playerSync",
   ROOMS: "rooms",
   GET_ROOMS: "getRooms",
   ERROR: "gameError",

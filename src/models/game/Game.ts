@@ -50,10 +50,19 @@ export class Game {
     //TODO: Add additional locic: game start logic, deal cards etc
     this.deckManager.initDeck(this.getExpansions());
     this.deckManager.dealCards(this.playerManager.getPlayers());
-
-    const firstPlayer = this.playerManager.getPlayers().at(0);
-    if (firstPlayer) {
-      this.turnManager.setFirstPlayer(firstPlayer.getId());
+    const players = this.playerManager.getPlayers();
+    if (players.length > 0) {
+      const randomIndex = Math.floor(Math.random() * players.length);
+      const randomPlayer = players[randomIndex];
+      if (randomPlayer) {
+        this.turnManager.setFirstPlayer(randomPlayer.getId());
+      } else {
+        // This case should theoretically never happen if players.length > 0 but we make TypeScript shut up.
+        console.error("Selected player is undefined despite players existing");
+        this.turnManager.setFirstPlayer(players[0]!.getId());
+      }
+    } else {
+      throw new Error("Cannot start game with no players");
     }
 
     this.status = "inProgress";
@@ -81,12 +90,12 @@ export class Game {
   removePlayer(playerId: string) {
     const newPlayers = this.playerManager.removePlayer(playerId);
     if (playerId === this.turnManager.getCurrentPlayerId()) {
-      this.turnManager.nextTurn(newPlayers);
+      this.turnManager.endTurn(newPlayers);
     }
   }
 
   async playCard(player: Player, card: BaseCard) {
-    if (this.isPlayersTurn(player)) {
+    if (!this.isPlayersTurn(player)) {
       throw new Error("It's not your turn");
     }
 
@@ -95,7 +104,7 @@ export class Game {
   }
 
   async nextTurn() {
-    this.turnManager.nextTurn(this.playerManager.getPlayers());
+    this.turnManager.endTurn(this.playerManager.getPlayers());
   }
 
   isFull() {
@@ -136,7 +145,7 @@ export class Game {
   disconnectPlayer(playerId: string) {
     this.playerManager.disconnectPlayer(playerId);
     if (playerId === this.turnManager.getCurrentPlayerId()) {
-      this.turnManager.nextTurn(this.playerManager.getPlayers());
+      this.turnManager.endTurn(this.playerManager.getPlayers());
     }
   }
 
@@ -146,6 +155,9 @@ export class Game {
 
   getPlayerManager() {
     return this.playerManager;
+  }
+  isPlayerGameHost(playerId: string) {
+    return this.playerManager.getPlayers().at(0)?.getId() === playerId;
   }
 
   getDeckManger() {

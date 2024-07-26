@@ -56,4 +56,10 @@ export class Player {
   getCardFromHand(cardId: string) {
     return this.handOfCards.find((card) => card.getId() === cardId);
   }
+
+  removeCardFromHand(cardId: string) {
+    this.handOfCards = this.handOfCards.filter(
+      (card) => card.getId() === cardId,
+    );
+  }
 }

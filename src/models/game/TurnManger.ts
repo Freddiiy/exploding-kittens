@@ -26,9 +26,10 @@ export default class TurnManager {
 
   setFirstPlayer(playerId: string) {
     this.currentPlayerId = playerId;
+    console.log("THIS PLAYERS TURN: ", this.currentPlayerId);
   }
 
-  nextTurn(players: Player[]) {
+  endTurn(players: Player[]) {
     if (!this.currentPlayerId) return; // Game hasn't started
 
     const currentIndex = players.findIndex(
@@ -59,11 +60,5 @@ export default class TurnManager {
 
   addTurnsToNextPlayer(turns: number) {
     this.turnsOnNextPlayer += turns;
-  }
-
-  endTurn() {
-    if (this.currentPlayerId === null) return;
-
-    const currentIndex = this.playerOrder;
   }
 }
