@@ -23,6 +23,10 @@ export default class PlayerManager {
     return [...this.players];
   }
 
+  getPlayerById(playerId: string) {
+    return this.players.find((player) => player.getId() === playerId);
+  }
+
   getMaxPlayers() {
     return this.maxPlayers;
   }

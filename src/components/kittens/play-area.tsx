@@ -10,12 +10,16 @@ export function PlayArea() {
   const { user } = useUser();
 
   return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "flex h-full w-[80%] min-w-[56rem] max-w-screen-2xl rounded-lg outline-dashed outline-2 outline-offset-2 outline-muted-foreground transition-all duration-300",
-        isOver && "outline-green-600",
-      )}
-    ></div>
+    <div className="mx-auto">
+      <div className="flex transform-none justify-center gap-4">
+        <div
+          ref={setNodeRef}
+          className={cn(
+            "relative flex h-card-height w-card-width items-center justify-center rounded-lg outline-dashed outline-2 outline-offset-2 outline-white",
+            isOver && "outline-green-600",
+          )}
+        ></div>
+      </div>
+    </div>
   );
 }

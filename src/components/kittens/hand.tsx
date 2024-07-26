@@ -44,6 +44,9 @@ export function Hand(props: HandProps) {
       ref={ref}
       className="relative flex h-full max-h-card-height w-full justify-center"
     >
+      <div className="absolute left-0 top-0 text-4xl">
+        {hoveredCardId ?? "none hovered"}
+      </div>
       {props.cards.map((card, i) => {
         const padding = 40;
         const isHovered = hoveredCardId === card.cardId;
@@ -58,7 +61,7 @@ export function Hand(props: HandProps) {
           x,
           y,
           rotate: isHovered ? 0 : `${angle(i)}rad`,
-          zIndex: isHovered ? 2 : 1,
+
           opacity: isHovered ? 0 : 1,
         };
 
@@ -74,13 +77,17 @@ export function Hand(props: HandProps) {
               setHoveredCardPosition({ x, y });
             }}
             onHoverEnd={() => setHoveredCardId(null)}
+            onMouseEnter={() => {
+              setHoveredCardId(card.cardId);
+              setHoveredCardPosition({ x, y });
+            }}
+            onMouseLeave={() => setHoveredCardId(null)}
           >
             <KittenCard card={card} />
           </motion.div>
         );
       })}
       {/* Preview layer */}
-
       <AnimatePresence>
         {hoveredCardId && !isDragActive && (
           <motion.div

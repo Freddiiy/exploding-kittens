@@ -4,6 +4,7 @@ import { generateRandomId } from "@/lib/generateRandomId";
 import TurnManager from "./TurnManger";
 import DeckManger from "./DeckManger";
 import PlayerManager from "./PlayerManager";
+import BaseCard from "../cards/_BaseCard";
 
 export interface GameSettings {
   publicGame: boolean;
@@ -82,6 +83,19 @@ export class Game {
     if (playerId === this.turnManager.getCurrentPlayerId()) {
       this.turnManager.nextTurn(newPlayers);
     }
+  }
+
+  async playCard(player: Player, card: BaseCard) {
+    if (this.isPlayersTurn(player)) {
+      throw new Error("It's not your turn");
+    }
+
+    await card.play(this, player);
+    this.nextTurn();
+  }
+
+  async nextTurn() {
+    this.turnManager.nextTurn(this.playerManager.getPlayers());
   }
 
   isFull() {

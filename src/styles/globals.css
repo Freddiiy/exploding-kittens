@@ -35,10 +35,10 @@
     --og-card-height: 88mm;
     --card-scale-factor: 0.8;
     --card-width: calc(
-      calc(var(--og-card-width) * 1.3) * var(--card-scale-factor)
+      calc(var(--og-card-width) * 1) * var(--card-scale-factor)
     );
     --card-height: calc(
-      calc(var(--og-card-height) * 1.3) * var(--card-scale-factor)
+      calc(var(--og-card-height) * 1) * var(--card-scale-factor)
     );
   }
 

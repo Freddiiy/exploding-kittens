@@ -72,6 +72,34 @@ export function Board() {
       description: "Shuffle the draw pile.",
       mechanics: "Shuffle the draw pile thoroughly and randomly.",
     },
+    {
+      cardId: generateRandomId(16),
+      type: CardType.SHUFFLE,
+      name: "Shuffle",
+      description: "Shuffle the draw pile.",
+      mechanics: "Shuffle the draw pile thoroughly and randomly.",
+    },
+    {
+      cardId: generateRandomId(16),
+      type: CardType.SHUFFLE,
+      name: "Shuffle",
+      description: "Shuffle the draw pile.",
+      mechanics: "Shuffle the draw pile thoroughly and randomly.",
+    },
+    {
+      cardId: generateRandomId(16),
+      type: CardType.SHUFFLE,
+      name: "Shuffle",
+      description: "Shuffle the draw pile.",
+      mechanics: "Shuffle the draw pile thoroughly and randomly.",
+    },
+    {
+      cardId: generateRandomId(16),
+      type: CardType.SHUFFLE,
+      name: "Shuffle",
+      description: "Shuffle the draw pile.",
+      mechanics: "Shuffle the draw pile thoroughly and randomly.",
+    },
   ];
 
   return (
@@ -92,7 +120,7 @@ export function Board() {
             id="player"
             className="relative row-span-3 flex items-center justify-center"
           >
-            <div className="absolute bottom-3 h-card-height w-full">
+            <div className="absolute -bottom-4 h-card-height w-full">
               <div className="flex h-full w-full items-start justify-center">
                 <Hand cards={explodingKittensCards} />
               </div>

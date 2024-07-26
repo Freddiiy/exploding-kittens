@@ -9,7 +9,7 @@ export default function Page() {
     name: "Nope",
     description: "Stop the action of another player.",
     mechanics:
-      "Play any time to stop any action except for an Exploding Kitten or a Defuse card.",
+      "Stop the action of another player. You can play this at any time.",
   };
   return (
     <div className="flex min-h-screen w-full items-center justify-center">

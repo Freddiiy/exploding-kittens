@@ -24,6 +24,7 @@ import { Artifika } from "next/font/google";
 import { createPortal } from "react-dom";
 import { BaseCardJSON } from "@/models/cards/_BaseCard";
 import { explodingKittenCharacters } from "@/models/characters";
+import { P } from "../ui/typography";
 
 interface KittenCardProps {
   cardId: string;
@@ -99,7 +100,7 @@ export function KittenCardSkeleton({ card, disabled }: KittenCardFullProps) {
         <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border-2 border-black bg-foreground">
           <KittenCardHeader />
 
-          <div className="relative m-2 min-h-[60%] flex-grow">
+          <div className="relative m-2 min-h-[60%] flex-grow overflow-hidden rounded-lg">
             <Image
               src={
                 explodingKittenCharacters.find(
@@ -110,8 +111,12 @@ export function KittenCardSkeleton({ card, disabled }: KittenCardFullProps) {
               layout="fill"
               objectFit="cover"
             />
+            <div className="justify-centerpx-4 absolute inset-x-0 bottom-4 mx-auto flex w-full px-2">
+              <div className="rounded-xl bg-muted/60 p-2">
+                <P className="text-xs text-white">{card.mechanics}</P>
+              </div>
+            </div>
           </div>
-          <KittenCardHeader flipped />
         </div>
       </div>
     </KittenCardContext.Provider>
@@ -153,21 +158,21 @@ interface KittenCardHeaderProps {
 function KittenCardHeader({ flipped }: KittenCardHeaderProps) {
   const cardCtx = useKittenCard();
   return (
-    <div className={cn("flex gap-2", flipped && "rotate-180")}>
+    <div className={cn("flex", flipped && "rotate-180")}>
       <div className="relative m-2 flex-shrink-0 p-0.5">
         <Image
           src={"/characters/angry_devil_cat.png"}
           alt="icon"
-          height={40}
-          width={40}
+          height={30}
+          width={30}
           className="aspect-square rounded-full"
         />
       </div>
-      <div className={cn("flex flex-col", flipped && "justify-center")}>
+      <div className={cn("flex flex-col pt-1", flipped && "justify-center")}>
         <h3 className="text-xl font-medium uppercase tracking-normal text-black">
           {cardCtx.card.name}
         </h3>
-        {!flipped && (
+        {!flipped && cardCtx.card.description && false && (
           <p className="text-xs font-thin uppercase leading-tight tracking-wide text-muted-foreground">
             {cardCtx.card.description}
           </p>

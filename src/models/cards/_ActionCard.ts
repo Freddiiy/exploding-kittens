@@ -20,7 +20,7 @@ export default abstract class ActionCard extends BaseCard {
     this.effects.push(effect);
   }
 
-  play(game: Game, player: Player) {
+  async play(game: Game, player: Player) {
     for (const effect of this.effects) {
       effect.apply(game, player);
     }

@@ -52,4 +52,8 @@ export class Player {
   addCardToHand(card: BaseCard) {
     this.handOfCards.push(card);
   }
+
+  getCardFromHand(cardId: string) {
+    return this.handOfCards.find((card) => card.getId() === cardId);
+  }
 }

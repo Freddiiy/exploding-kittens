@@ -19,6 +19,7 @@ export default class GameService {
       this.handleJoinGame(socket);
       this.handleGetSync(socket);
       this.handleGetRooms(socket);
+      this.handlePlayCard(socket);
 
       socket.on("disconnect", () => {
         console.log("PLAYER DISCONNECTED");
@@ -43,6 +44,37 @@ export default class GameService {
         }
       });
     });
+  }
+
+  private handlePlayCard(socket: Socket) {
+    socket.on(
+      GAME_ACTIONS.PLAY_CARD,
+      async ({ gameId, playerId, cardId }: PlayCardHadler) => {
+        try {
+          const game = this.getGame(gameId);
+          const currentPlayer = game.getPlayerManager().getPlayerById(playerId);
+
+          const card = currentPlayer?.getCardFromHand(cardId);
+
+          if (!currentPlayer) {
+            throw new Error("Player not found.");
+          }
+
+          if (!game.isPlayersTurn(currentPlayer)) {
+            throw new Error("it's not your turn.");
+          }
+
+          if (!card) {
+            throw new Error("Card not found in player's hand.");
+          }
+
+          await game.playCard(currentPlayer, card);
+        } catch (error) {
+          const err = error as Error;
+          socket.emit(GAME_ACTIONS.ERROR, { message: err.message });
+        }
+      },
+    );
   }
 
   private handleCreateGame(socket: Socket) {
@@ -70,7 +102,6 @@ export default class GameService {
           .getPlayers()
           .find((p) => p.getId() === player.userId);
 
-        console.log("join game run");
         if (currentPlayer) {
           console.log("current player confirmed");
           game.reconnectPlayer(currentPlayer.getId(), socket.id);
@@ -192,6 +223,12 @@ export default class GameService {
   }
 }
 
+export interface PlayCardHadler {
+  gameId: string;
+  playerId: string;
+  cardId: string;
+}
+
 export interface PlayerClient {
   id: string;
   username: string;
@@ -216,6 +253,7 @@ export interface PlayerSpecificGameState extends GameState {
 }
 
 export const GAME_ACTIONS = {
+  PLAY_CARD: "playCard",
   CREATE: "create",
   JOIN: "join",
   REJOIN: "rejoin",
@@ -225,6 +263,7 @@ export const GAME_ACTIONS = {
   SYNC: "sync",
   ROOMS: "rooms",
   GET_ROOMS: "getRooms",
+  ERROR: "gameError",
 };
 
 export interface CreateGameHandler {
