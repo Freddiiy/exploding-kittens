@@ -3,7 +3,6 @@ import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
 import { Player, type PlayerData } from "@/models/Player";
-
 import { type Server, type Socket } from "socket.io";
 
 export default class GameService {
@@ -16,13 +15,13 @@ export default class GameService {
   }
   socketHandler() {
     this.io.on("connection", (socket) => {
+      this.handleStartGame(socket);
       this.handleCreateGame(socket);
       this.handleJoinGame(socket);
       this.handleGetSync(socket);
       this.handleGetRooms(socket);
       this.handlePlayCard(socket);
       this.handleDrawCard(socket);
-      this.handleStartGame(socket);
 
       socket.on("disconnect", () => {
         console.log("PLAYER DISCONNECTED");
@@ -88,7 +87,7 @@ export default class GameService {
   private handleDrawCard(socket: Socket) {
     socket.on(
       GAME_ACTIONS.DRAW_CARD,
-      async ({ gameId, playerId }: DrawCardHandler) => {
+      async ({ gameId, playerId }: DrawCardHandler, callback) => {
         try {
           const game = this.getGame(gameId);
           const currentPlayer = game.getPlayerManager().getPlayerById(playerId);
@@ -98,7 +97,6 @@ export default class GameService {
           }
 
           if (!game.isPlayersTurn(currentPlayer)) {
-            console.log("IS MY TURN: ", game.isPlayersTurn(currentPlayer));
             throw new Error("it's not your turn.");
           }
 
@@ -110,6 +108,7 @@ export default class GameService {
 
           currentPlayer.addCardToHand(card);
           game.getTurnManger().endTurn(game.getPlayerManager().getPlayers());
+          callback?.(card.toJSON());
           this.sendGameState(game.getId());
         } catch (error) {
           const err = error as Error;
@@ -198,7 +197,6 @@ export default class GameService {
   }
 
   ROOMS_CHANNEL = "rooms-channel";
-
   private handleGetRooms(socket: Socket) {
     socket.on(GAME_ACTIONS.GET_ROOMS, async () => {
       const allGames = Array.from(this.games.values())
@@ -260,13 +258,16 @@ export default class GameService {
         const playerSocket = this.io.sockets.sockets.get(playerSocketId);
         if (playerSocket) {
           const playerState: PlayerState = {
+            latestCard: !game.isPlayersTurn(player)
+              ? (game.getDeckManger().getLastDrawnCard()?.toJSON() ?? null)
+              : null,
             playerHandOfCards: player
               .getHandOfCard()
               .map((card) => card.toJSON()),
             isPlayersTurn: game.isPlayersTurn(player),
           };
 
-          playerSocket.to(gameId).emit(GAME_ACTIONS.PLAYER_SYNC, playerState);
+          playerSocket.emit(GAME_ACTIONS.PLAYER_SYNC, playerState);
         }
       }
     });
@@ -318,6 +319,7 @@ export interface GameState {
 }
 
 export interface PlayerState {
+  latestCard: BaseCardJSON | null;
   playerHandOfCards: BaseCardJSON[];
   isPlayersTurn: boolean;
 }

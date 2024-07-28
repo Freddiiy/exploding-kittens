@@ -26,6 +26,7 @@ import type Deck from "@/models/Card";
 
 import { type PlayerState } from "../services/GameService";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { BaseCardJSON } from "@/models/cards/_BaseCard";
 
 interface GameContext {
   connected: boolean;
@@ -33,6 +34,7 @@ interface GameContext {
   gameState: GameState | null;
   gameStatus: GameStatus | "notFound";
   playerState: PlayerState | null;
+  lastPlayedCard: BaseCardJSON | null;
 }
 
 const GameContext = createContext<GameContext | null>(null);
@@ -48,9 +50,11 @@ export function GameProvider({ children }: GameProviderProps) {
     "waiting",
   );
 
-  const [playerState, setPlayerState] = useState<PlayerState | null>(null);
-
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [lastPlayedCard, setLastPlayedCard] = useState<BaseCardJSON | null>(
+    null,
+  );
 
   const { user } = useUser();
 
@@ -97,7 +101,12 @@ export function GameProvider({ children }: GameProviderProps) {
       });
 
       socket.on(GAME_ACTIONS.PLAYER_SYNC, (playerState: PlayerState) => {
-        setPlayerState(playerState);
+        setLastPlayedCard(playerState.latestCard);
+
+        //So the animation will trigger, dunno how to fix better.
+        setTimeout(() => {
+          setPlayerState(playerState);
+        }, 100);
       });
 
       return () => {
@@ -110,7 +119,14 @@ export function GameProvider({ children }: GameProviderProps) {
   }, [gameId, connected]);
   return (
     <GameContext.Provider
-      value={{ connected, retryCount, gameState, gameStatus, playerState }}
+      value={{
+        connected,
+        retryCount,
+        gameState,
+        gameStatus,
+        playerState,
+        lastPlayedCard,
+      }}
     >
       {children}
     </GameContext.Provider>

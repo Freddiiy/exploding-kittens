@@ -9,13 +9,22 @@ import { type PlayerData } from "@/models/Player";
 
 interface PlayerAvatarProps {
   user: Omit<PlayerData, "userId">;
+  size?: "default" | "lg" | "sm" | "xs";
 }
-export function PlayerAvatar({ user }: PlayerAvatarProps) {
+export function PlayerAvatar({ user, size = "default" }: PlayerAvatarProps) {
   const src =
     explodingKittenCharacters.find((c) => c.name === user.avatar)?.img ?? "";
   return (
     <div className="flex flex-col items-center justify-center gap-2">
-      <GameAvatar src={src} fallback={user.username.at(0) ?? ""} />
+      <GameAvatar
+        src={src}
+        fallback={user.username.at(0) ?? ""}
+        className={cn(
+          size === "lg" && "size-24",
+          size === "sm" && "size-12",
+          size === "xs" && "size-6",
+        )}
+      />
       <P className="max-w-20 truncate text-nowrap">{user.username}</P>
     </div>
   );
@@ -24,11 +33,12 @@ export function PlayerAvatar({ user }: PlayerAvatarProps) {
 interface GameAvatarProps {
   src: string;
   fallback: string;
+  className?: string;
 }
 
-export function GameAvatar({ src, fallback }: GameAvatarProps) {
+export function GameAvatar({ src, fallback, className }: GameAvatarProps) {
   return (
-    <Avatar className="size-16">
+    <Avatar className={cn("size-16", className)}>
       <AvatarImage src={src} />
       <AvatarFallback>{fallback}</AvatarFallback>
     </Avatar>

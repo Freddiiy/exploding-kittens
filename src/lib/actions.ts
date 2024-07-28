@@ -1,3 +1,4 @@
+import { BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   type DrawCardHandler,
   GAME_ACTIONS,
@@ -15,7 +16,7 @@ export function playCard(gameId: string, playerId: string, cardId: string) {
   socket.emit(GAME_ACTIONS.PLAY_CARD, cardToPlay);
 }
 
-export function darwCard(gameId: string, playerId: string) {
+export function drawCard(gameId: string, playerId: string) {
   const cardToPlay: DrawCardHandler = {
     gameId,
     playerId,

@@ -81,9 +81,9 @@ export class Game {
   getCurrentPlayer(): Player | null {
     const currentPlayerId = this.turnManager.getCurrentPlayerId();
     return currentPlayerId
-      ? this.playerManager
+      ? (this.playerManager
           .getPlayers()
-          .find((p) => p.getId() === currentPlayerId) || null
+          .find((p) => p.getId() === currentPlayerId) ?? null)
       : null;
   }
 
@@ -100,7 +100,6 @@ export class Game {
     }
 
     await card.play(this, player);
-    this.nextTurn();
   }
 
   async nextTurn() {

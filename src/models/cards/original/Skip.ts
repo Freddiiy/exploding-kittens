@@ -11,8 +11,8 @@ export default class Nope extends ActionCard {
     const mechanics = `If you play a Skip Card as a defense to an Attack Card, it only ends 1 of the 2 turns. 2 Skip Cards would end both turns.`;
 
     super(
-      CardType.NOPE,
-      "Nope",
+      CardType.SKIP,
+      "Skip",
       "End your turn without drawing a card.",
       mechanics,
     );

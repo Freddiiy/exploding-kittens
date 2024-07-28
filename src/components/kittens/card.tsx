@@ -38,19 +38,23 @@ interface KittenCardProps {
 interface KittenCardFullProps {
   card: KittenCardProps;
   disabled?: boolean;
+  flipped?: boolean;
+
   className?: string;
 }
 
 export function KittenCard({
   card,
   disabled = false,
+  flipped = false,
+  dragDisabled = false,
   className,
-}: KittenCardFullProps) {
+}: KittenCardFullProps & { dragDisabled?: boolean }) {
   const isDragActive = useDndIsReallyActiveId(card.cardId);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: card.cardId,
-    disabled,
+    disabled: dragDisabled || disabled,
   });
 
   const style = {
@@ -59,21 +63,25 @@ export function KittenCard({
   };
 
   return (
-    <div>
-      <div {...attributes} {...listeners} style={style} ref={setNodeRef}>
-        <KittenCardCard card={card} disabled={disabled} />
-      </div>
+    <div ref={setNodeRef} style={{ opacity: isDragActive ? 0 : 1 }}>
+      <motion.div {...attributes} {...listeners} style={style}>
+        <KittenCardCard card={card} disabled={disabled} flipped={flipped} />
+      </motion.div>
 
       <KittenCardDragOverlay card={card}>
-        <div style={{ opacity: isDragActive ? 1 : 0 }}>
-          <KittenCardCard card={card} />
-        </div>
+        <motion.div style={{ opacity: isDragActive ? 1 : 0 }}>
+          <KittenCardCard card={card} flipped={flipped} />
+        </motion.div>
       </KittenCardDragOverlay>
     </div>
   );
 }
 
-export function KittenCardCard({ card, disabled }: KittenCardFullProps) {
+export function KittenCardCard({
+  card,
+  disabled = false,
+  flipped = false,
+}: KittenCardFullProps) {
   const controls = useAnimation();
   const isDragActive = useDndIsReallyActiveId(card.cardId);
 
@@ -84,21 +92,38 @@ export function KittenCardCard({ card, disabled }: KittenCardFullProps) {
   }, [isDragActive, controls]);
 
   return (
-    <motion.div animate={controls}>
-      <KittenCardSkeleton card={card} disabled={disabled} />
+    <motion.div
+      animate={isDragActive ? controls : undefined}
+      layoutId={!isDragActive ? "card-" + card.cardId : undefined}
+    >
+      <KittenCardSkeleton card={card} disabled={disabled} flipped={flipped} />
     </motion.div>
   );
 }
 
-export function KittenCardSkeleton({ card, disabled }: KittenCardFullProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
+export function KittenCardSkeleton({
+  card,
+  disabled = false,
+  flipped = false,
+}: KittenCardFullProps) {
+  const [isFlipped, setIsFlipped] = useState(flipped);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  useEffect(() => {
+    if (isFlipped !== flipped) {
+      setIsFlipped(flipped);
+      setShouldAnimate(true);
+    }
+  }, [flipped]);
+
   return (
-    <KittenCardContext.Provider value={{ card: card, disabled }}>
+    <KittenCardContext.Provider
+      value={{ card: card, disabled, flipped: flipped }}
+    >
       <motion.div
-        onClick={() => setIsFlipped((prev) => !prev)}
         className="relative h-card-height w-card-width"
         style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        initial={{ rotateY: flipped ? 180 : 0 }}
+        animate={shouldAnimate && { rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.3 }}
       >
         <motion.div
@@ -121,7 +146,7 @@ export function KittenCardSkeleton({ card, disabled }: KittenCardFullProps) {
 export function KittenCardContent() {
   const { card } = useKittenCard();
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border-2 border-black bg-white">
+    <div className="flex h-card-height w-card-width flex-col overflow-hidden rounded-xl border-2 border-black bg-white">
       <KittenCardHeader />
       <div className="relative m-2 min-h-[60%] flex-grow overflow-hidden rounded-lg">
         <Image
@@ -146,7 +171,7 @@ export function KittenCardContent() {
 
 export function KittenCardBackface() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center -space-y-2 overflow-hidden rounded-xl border-2 border-black bg-red-900">
+    <div className="flex h-card-height w-card-width flex-col items-center justify-center -space-y-2 overflow-hidden rounded-xl border-2 border-red-900 bg-red-900">
       <h2 className="text-4xl font-bold">
         <span className="text-clip bg-gradient-to-t from-red-800 via-red-500 to-yellow-300 bg-clip-text text-transparent">
           EXPLODING

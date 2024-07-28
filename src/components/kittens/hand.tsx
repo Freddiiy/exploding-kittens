@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
-import { KittenCard, KittenCardCard, useDndIsReallyActiveId } from "./card";
+import {
+  KittenCard,
+  KittenCardCard,
+  KittenCardSkeleton,
+  useDndIsReallyActiveId,
+} from "./card";
 
 interface HandProps {
   cards: BaseCardJSON[];
@@ -46,9 +51,6 @@ export function Hand(props: HandProps) {
       ref={ref}
       className="relative flex h-full max-h-card-height w-full justify-center"
     >
-      <div className="absolute left-0 top-0 text-4xl">
-        {hoveredCardId ?? "none hovered"}
-      </div>
       {props.cards.map((card, i) => {
         const padding = 40;
         const isHovered = hoveredCardId === card.cardId;
@@ -73,7 +75,10 @@ export function Hand(props: HandProps) {
             key={card.cardId}
             style={{ transformOrigin: "center bottom" }}
             animate={animate}
-            transition={{ duration: 0.1 }}
+            initial={{
+              y: 400,
+            }}
+            transition={{ duration: 0.3 }}
             onHoverStart={() => {
               setHoveredCardId(card.cardId);
               setHoveredCardPosition({ x, y });
@@ -84,8 +89,10 @@ export function Hand(props: HandProps) {
           </motion.div>
         );
       })}
+
       {/* Preview layer */}
-      <AnimatePresence key={hoveredCardId}>
+
+      <AnimatePresence key={"preview-card-" + hoveredCardId}>
         {hoveredCardId && !isDragActive && (
           <motion.div
             key={hoveredCard.cardId}
@@ -96,7 +103,7 @@ export function Hand(props: HandProps) {
             animate={{
               scale: 1.5,
               x: hoveredCardPosition.x,
-              y: -170,
+              y: -150,
             }}
             exit={{
               opacity: 0,
@@ -107,7 +114,7 @@ export function Hand(props: HandProps) {
             className="pointer-events-none absolute"
             style={{ zIndex: 10 }}
           >
-            <KittenCardCard card={hoveredCard} disabled={true} />
+            <KittenCardSkeleton card={hoveredCard} disabled={true} />
           </motion.div>
         )}
       </AnimatePresence>

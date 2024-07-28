@@ -10,6 +10,7 @@ const INITIAL_MAX_AMOUNT_OF_CARDS = 7;
 export default class DeckManger {
   private deck: BaseCard[] = [];
   private discardPile: BaseCard[] = [];
+  private lastDrawnCard: BaseCard | undefined = undefined;
 
   initDeck(expansions: Expansion[]) {
     expansions.forEach((exps) => {
@@ -55,7 +56,13 @@ export default class DeckManger {
   }
 
   drawCard() {
-    return this.deck.pop();
+    const drawnCard = this.deck.pop();
+    this.lastDrawnCard = drawnCard;
+    return drawnCard;
+  }
+
+  getLastDrawnCard() {
+    return this.lastDrawnCard;
   }
 
   addCard(card: BaseCard) {

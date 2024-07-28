@@ -59,7 +59,7 @@ export class Player {
 
   removeCardFromHand(cardId: string) {
     this.handOfCards = this.handOfCards.filter(
-      (card) => card.getId() === cardId,
+      (card) => card.getId() !== cardId,
     );
   }
 }
