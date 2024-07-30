@@ -18,6 +18,7 @@ export class Player {
   private username: string;
   private avatar: string;
   private handOfCards: BaseCard[] = [];
+  private lastPlayedCard: BaseCard | null = null;
 
   constructor(playerOptions: PlayerData) {
     this.userId = playerOptions.userId;
@@ -55,6 +56,14 @@ export class Player {
 
   getCardFromHand(cardId: string) {
     return this.handOfCards.find((card) => card.getId() === cardId);
+  }
+
+  getLastPlayedCard() {
+    return this.lastPlayedCard;
+  }
+
+  setLastPlayCard(card: BaseCard) {
+    this.lastPlayedCard = card;
   }
 
   removeCardFromHand(cardId: string) {

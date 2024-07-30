@@ -27,6 +27,7 @@ import type Deck from "@/models/Card";
 import { type PlayerState } from "../services/GameService";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { BaseCardJSON } from "@/models/cards/_BaseCard";
+import { flushSync } from "react-dom";
 
 interface GameContext {
   connected: boolean;
@@ -100,13 +101,10 @@ export function GameProvider({ children }: GameProviderProps) {
         setGameStatus(gameState.status);
       });
 
-      socket.on(GAME_ACTIONS.PLAYER_SYNC, (playerState: PlayerState) => {
-        setLastPlayedCard(playerState.latestCard);
-
-        //So the animation will trigger, dunno how to fix better.
-        setTimeout(() => {
-          setPlayerState(playerState);
-        }, 100);
+      socket.on(GAME_ACTIONS.PLAYER_SYNC, (_playerState: PlayerState) => {
+        setLastPlayedCard(_playerState.latestCard);
+        setTimeout(() => setPlayerState(_playerState), 10);
+        setTimeout(() => setLastPlayedCard(null), 10);
       });
 
       return () => {
@@ -117,6 +115,7 @@ export function GameProvider({ children }: GameProviderProps) {
       };
     }
   }, [gameId, connected]);
+
   return (
     <GameContext.Provider
       value={{

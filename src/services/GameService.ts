@@ -231,6 +231,7 @@ export default class GameService {
         avatar: player.getAvatar(),
         handSize: player.getHandOfCard().length,
         isCurrentTurn: game.isPlayersTurn(player),
+        lastPlayedCard: player.getLastPlayedCard()?.toJSON() ?? null,
       })),
       currentPlayerId: currentPlayer?.getId() ?? null,
       deckSize: game.getDeckManger().getDeckSize(),
@@ -306,6 +307,7 @@ export interface PlayerClient {
   avatar: string;
   handSize: number;
   isCurrentTurn: boolean;
+  lastPlayedCard: BaseCardJSON | null;
 }
 export interface GameState {
   id: string;

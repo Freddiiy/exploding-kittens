@@ -15,7 +15,7 @@ import {
 } from "./card";
 import { drawCard, playCard } from "@/lib/actions";
 import { useGame } from "../game-provider";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { Card } from "../ui/card";
 import { useState } from "react";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
@@ -63,7 +63,11 @@ export function PlayArea() {
           )}
         >
           {gameState?.discardPile.map((card) => (
-            <motion.div key={card.cardId} className="absolute inset-0">
+            <motion.div
+              layoutId={card.cardId}
+              key={card.cardId}
+              className="absolute inset-0"
+            >
               <KittenCardCard card={card} />
             </motion.div>
           ))}
@@ -71,6 +75,7 @@ export function PlayArea() {
             layoutId={parent?.toString()}
             key={parent?.toString()}
             className="pointer-events-none absolute inset-0"
+            layout={false}
           >
             {dndCard ? <KittenCard card={dndCard} /> : null}
           </motion.div>
@@ -98,13 +103,13 @@ export function PlayArea() {
             }}
           >
             {(gameState?.deckSize ?? 0) > 0 ? (
-              <>
+              <motion.div layoutId={lastPlayedCard?.cardId}>
                 {lastPlayedCard ? (
-                  <KittenCardCard card={lastPlayedCard} flipped />
+                  <KittenCardCard card={lastPlayedCard} />
                 ) : (
                   <KittenCardBackface />
                 )}
-              </>
+              </motion.div>
             ) : null}
           </motion.button>
           <H2 className="text-4xl group-[.is-over]:text-green-600">

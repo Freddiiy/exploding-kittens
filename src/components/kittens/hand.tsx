@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   KittenCard,
@@ -7,6 +7,7 @@ import {
   KittenCardSkeleton,
   useDndIsReallyActiveId,
 } from "./card";
+import { useUser } from "../user-context";
 
 interface HandProps {
   cards: BaseCardJSON[];
@@ -23,6 +24,7 @@ export function Hand(props: HandProps) {
     y: 0,
   });
   const isDragActive = useDndIsReallyActiveId(hoveredCardId || "");
+  const { user } = useUser();
 
   useEffect(() => {
     const onResize = () => setHandWidth(ref.current!.clientWidth);
@@ -73,12 +75,11 @@ export function Hand(props: HandProps) {
           <motion.div
             className="absolute cursor-pointer"
             key={card.cardId}
+            layout={false}
             style={{ transformOrigin: "center bottom" }}
             animate={animate}
-            initial={{
-              y: 400,
-            }}
-            transition={{ duration: 0.3 }}
+            exit={"hidden"}
+            transition={{ duration: isHovered ? 0.1 : 0.3 }}
             onHoverStart={() => {
               setHoveredCardId(card.cardId);
               setHoveredCardPosition({ x, y });
@@ -92,32 +93,34 @@ export function Hand(props: HandProps) {
 
       {/* Preview layer */}
 
-      <AnimatePresence key={"preview-card-" + hoveredCardId}>
-        {hoveredCardId && !isDragActive && (
-          <motion.div
-            key={hoveredCard.cardId}
-            initial={{
-              x: hoveredCardPosition.x,
-              y: -20,
-            }}
-            animate={{
-              scale: 1.5,
-              x: hoveredCardPosition.x,
-              y: -150,
-            }}
-            exit={{
-              opacity: 0,
-              x: hoveredCardPosition.x,
-              y: -50,
-            }}
-            transition={{ duration: 0.1 }}
-            className="pointer-events-none absolute"
-            style={{ zIndex: 10 }}
-          >
-            <KittenCardSkeleton card={hoveredCard} disabled={true} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LayoutGroup>
+        <AnimatePresence key={"preview-card-" + hoveredCardId}>
+          {hoveredCardId && !isDragActive && (
+            <motion.div
+              key={hoveredCard.cardId}
+              initial={{
+                x: hoveredCardPosition.x,
+                y: -20,
+              }}
+              animate={{
+                scale: 1.5,
+                x: hoveredCardPosition.x,
+                y: -150,
+              }}
+              exit={{
+                opacity: 0,
+                x: hoveredCardPosition.x,
+                y: -50,
+              }}
+              transition={{ duration: 0.1 }}
+              className="pointer-events-none absolute"
+              style={{ zIndex: 10 }}
+            >
+              <KittenCardSkeleton card={hoveredCard} disabled={true} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </LayoutGroup>
     </div>
   );
 }

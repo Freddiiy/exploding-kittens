@@ -1,7 +1,7 @@
 "use client";
 
 import { CardType } from "@/models/cards/_CardType";
-import { KittenCard, KittenCardBackface } from "./card";
+import { KittenCard, KittenCardBackface, KittenCardCard } from "./card";
 import { PlayArea } from "./play-area";
 import {
   CollisionDetection,
@@ -18,7 +18,6 @@ import { useGame } from "../game-provider";
 import { GameAvatar, PlayerAvatar } from "../game-avatar";
 import { useUser } from "../user-context";
 import { H3, H4, H6 } from "../ui/typography";
-import { motion } from "framer-motion";
 
 export function Board() {
   const { gameState, playerState } = useGame();
@@ -34,24 +33,37 @@ export function Board() {
             <div className="flex gap-1 pt-4">
               {gameState?.players
                 .filter((player) => player.id !== user.userId)
-                .map((player) => (
-                  <div
-                    key={player.id}
-                    className="flex flex-col items-center -space-y-10"
-                  >
-                    <div>
-                      <PlayerAvatar user={player} size="sm" />
-                    </div>
-                    <div className="relative flex scale-50 items-center justify-center">
-                      <KittenCardBackface />
-                      <div className="absolute left-1 top-1 -translate-x-1/2 -translate-y-1/2">
-                        <div className="flex size-20 items-center justify-center rounded-full bg-secondary">
-                          <H3 className="text-4xl">{player.handSize}</H3>
+                .map((player) => {
+                  const lastPlayedCard = gameState.discardPile.at(0);
+                  return (
+                    <div
+                      key={player.id}
+                      className="flex flex-col items-center -space-y-10"
+                    >
+                      <div>
+                        <PlayerAvatar
+                          user={player}
+                          size="sm"
+                          selected={player.isCurrentTurn}
+                        />
+                      </div>
+                      <div className="relative flex h-card-height w-card-width scale-50 items-center justify-center">
+                        <div className="absolute inset-0">
+                          <KittenCardBackface />
+                        </div>
+                        {player.isCurrentTurn && lastPlayedCard && (
+                          <KittenCardCard card={lastPlayedCard} />
+                        )}
+
+                        <div className="absolute left-1 top-1 -translate-x-1/2 -translate-y-1/2">
+                          <div className="flex size-20 items-center justify-center rounded-full bg-secondary">
+                            <H3 className="text-4xl">{player.handSize}</H3>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
           <div

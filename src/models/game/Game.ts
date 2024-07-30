@@ -100,6 +100,7 @@ export class Game {
     }
 
     await card.play(this, player);
+    player.setLastPlayCard(card);
   }
 
   async nextTurn() {

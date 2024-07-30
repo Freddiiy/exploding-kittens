@@ -26,6 +26,7 @@ import { BaseCardJSON } from "@/models/cards/_BaseCard";
 import { explodingKittenCharacters } from "@/models/characters";
 import { P } from "../ui/typography";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
+import { useGame } from "../game-provider";
 
 interface KittenCardProps {
   cardId: string;
@@ -84,6 +85,7 @@ export function KittenCardCard({
 }: KittenCardFullProps) {
   const controls = useAnimation();
   const isDragActive = useDndIsReallyActiveId(card.cardId);
+  const { gameState } = useGame();
 
   useEffect(() => {
     if (isDragActive) {
@@ -94,7 +96,11 @@ export function KittenCardCard({
   return (
     <motion.div
       animate={isDragActive ? controls : undefined}
-      layoutId={!isDragActive ? "card-" + card.cardId : undefined}
+      layoutId={
+        !isDragActive
+          ? "player-" + gameState?.currentPlayerId + "card-" + card.cardId
+          : undefined
+      }
     >
       <KittenCardSkeleton card={card} disabled={disabled} flipped={flipped} />
     </motion.div>
@@ -247,46 +253,6 @@ interface PreviewProps {
   hoveredCardId: string | null;
   hoveredCardPosition: { x: number; y: number };
   card: BaseCardJSON | undefined;
-}
-
-export function CardPreview({
-  hoveredCardId,
-  hoveredCardPosition,
-  card,
-}: PreviewProps) {
-  return createPortal(
-    <AnimatePresence>
-      {hoveredCardId && card && (
-        <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.8,
-            x: hoveredCardPosition.x,
-            y: hoveredCardPosition.y,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 2,
-            x: hoveredCardPosition.x,
-            y: hoveredCardPosition.y - 200,
-          }}
-          exit={{
-            opacity: 0,
-            scale: 0.8,
-            x: hoveredCardPosition.x,
-            y: hoveredCardPosition.y,
-          }}
-          transition={{ duration: 0.2 }}
-          className="pointer-events-none fixed"
-          style={{ zIndex: 9999 }}
-        >
-          <div>{hoveredCardId}</div>
-          <KittenCardCard card={card} disabled={true} />
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body,
-  );
 }
 
 const KittenCardContext = createContext<KittenCardFullProps | null>(null);

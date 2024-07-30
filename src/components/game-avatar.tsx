@@ -10,8 +10,13 @@ import { type PlayerData } from "@/models/Player";
 interface PlayerAvatarProps {
   user: Omit<PlayerData, "userId">;
   size?: "default" | "lg" | "sm" | "xs";
+  selected?: boolean;
 }
-export function PlayerAvatar({ user, size = "default" }: PlayerAvatarProps) {
+export function PlayerAvatar({
+  user,
+  size = "default",
+  selected = false,
+}: PlayerAvatarProps) {
   const src =
     explodingKittenCharacters.find((c) => c.name === user.avatar)?.img ?? "";
   return (
@@ -23,6 +28,8 @@ export function PlayerAvatar({ user, size = "default" }: PlayerAvatarProps) {
           size === "lg" && "size-24",
           size === "sm" && "size-12",
           size === "xs" && "size-6",
+          selected && "ring ring-primary ring-offset-2 ring-offset-background",
+          "transition-all duration-150",
         )}
       />
       <P className="max-w-20 truncate text-nowrap">{user.username}</P>
