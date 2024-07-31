@@ -71,6 +71,7 @@ export function PlayArea() {
               <KittenCardCard card={card} />
             </motion.div>
           ))}
+          {lastPlayedCard && <KittenCardCard card={lastPlayedCard} />}
           <motion.div
             layoutId={parent?.toString()}
             key={parent?.toString()}

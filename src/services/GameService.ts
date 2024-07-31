@@ -128,7 +128,7 @@ export default class GameService {
 
         settings.expansions = [baseExpansion];
 
-        const game = new Game(settings);
+        const game = new Game(settings, 5, this);
         this.games.set(game.getId(), game);
         callback?.(game.getId());
       },
@@ -225,14 +225,12 @@ export default class GameService {
 
     const baseGameState: GameState = {
       id: game.getId(),
-      players: players.map((player) => ({
-        id: player.getId(),
-        username: player.getUsername(),
-        avatar: player.getAvatar(),
-        handSize: player.getHandOfCard().length,
-        isCurrentTurn: game.isPlayersTurn(player),
-        lastPlayedCard: player.getLastPlayedCard()?.toJSON() ?? null,
-      })),
+      players: players.map((player) => {
+        return {
+          ...player.toPlayerClient(),
+          isCurrentTurn: game.isPlayersTurn(player),
+        };
+      }),
       currentPlayerId: currentPlayer?.getId() ?? null,
       deckSize: game.getDeckManger().getDeckSize(),
       discardPile: game
@@ -274,6 +272,31 @@ export default class GameService {
     });
   }
 
+  sendRequest(
+    playerId: string,
+    requestType: string,
+    data: any,
+    callback: (response: any) => void,
+  ) {
+    const game = Array.from(this.games.values()).find((game) =>
+      game.getPlayerManager().getPlayerById(playerId),
+    );
+
+    if (game) {
+      callback(null);
+      throw new Error("Game is not found");
+    }
+    const playerSocket = this.io.sockets.sockets.get(playerId);
+    if (playerSocket) {
+      playerSocket.emit(requestType, data);
+      playerSocket.once(GAME_ACTIONS.CLIENT_RESPONSE, (response) => {
+        callback(response);
+      });
+    } else {
+      callback(null); // Player not found or disconnected
+    }
+  }
+
   private getGame(gameId: string) {
     const game = this.games.get(gameId);
 
@@ -306,12 +329,16 @@ export interface PlayerClient {
   username: string;
   avatar: string;
   handSize: number;
-  isCurrentTurn: boolean;
+
   lastPlayedCard: BaseCardJSON | null;
+}
+
+export interface GameStatePlayerClient extends PlayerClient {
+  isCurrentTurn: boolean;
 }
 export interface GameState {
   id: string;
-  players: PlayerClient[];
+  players: GameStatePlayerClient[];
   currentPlayerId: string | null;
   deckSize: number;
   status: GameStatus;
@@ -341,6 +368,7 @@ export const GAME_ACTIONS = {
   ROOMS: "rooms",
   GET_ROOMS: "getRooms",
   ERROR: "gameError",
+  CLIENT_RESPONSE: "clientResponse",
 };
 
 export interface CreateGameHandler {

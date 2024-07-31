@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type BaseCard from "./cards/_BaseCard";
+import { PlayerClient } from "@/services/GameService";
 
 export const playerOtionsSchema = z.object({
   userId: z.string().min(16).max(16),
@@ -50,6 +51,10 @@ export class Player {
     return this.handOfCards;
   }
 
+  getHandSize() {
+    return this.getHandOfCard().length;
+  }
+
   addCardToHand(card: BaseCard) {
     this.handOfCards.push(card);
   }
@@ -70,5 +75,17 @@ export class Player {
     this.handOfCards = this.handOfCards.filter(
       (card) => card.getId() !== cardId,
     );
+  }
+
+  toPlayerClient(isCurrentTurn = false) {
+    const playerClient: PlayerClient = {
+      id: this.getId(),
+      username: this.getUsername(),
+      avatar: this.getAvatar(),
+      handSize: this.getHandOfCard().length,
+      lastPlayedCard: this.getLastPlayedCard()?.toJSON() ?? null,
+    };
+
+    return playerClient;
   }
 }

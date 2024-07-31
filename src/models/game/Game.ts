@@ -5,6 +5,7 @@ import TurnManager from "./TurnManger";
 import DeckManger from "./DeckManger";
 import PlayerManager from "./PlayerManager";
 import BaseCard from "../cards/_BaseCard";
+import GameService from "@/services/GameService";
 
 export interface GameSettings {
   publicGame: boolean;
@@ -14,6 +15,7 @@ export interface GameSettings {
 
 export type GameStatus = "waiting" | "inProgress" | "ended";
 export class Game {
+  private gameService: GameService;
   private createdAt: Date;
 
   private id: string;
@@ -27,12 +29,16 @@ export class Game {
   private deckManager: DeckManger;
   private turnManager: TurnManager;
 
-  constructor(gameSettings: GameSettings, maxPlayers: number = 5) {
+  constructor(
+    gameSettings: GameSettings,
+    maxPlayers: number = 5,
+    gameService: GameService,
+  ) {
+    this.gameService = gameService;
     this.publicGame = gameSettings.publicGame ?? true;
     this.name = gameSettings.name ?? "A game of Exploding Kittens";
     this.expansions = gameSettings.expansions ?? [];
-
-    this.playerManager = new PlayerManager(maxPlayers);
+    this.playerManager = new PlayerManager(maxPlayers, gameService);
     this.deckManager = new DeckManger();
     this.turnManager = new TurnManager();
 

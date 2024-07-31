@@ -11,13 +11,11 @@ import {
   rectIntersection,
   type DragStartEvent,
 } from "@dnd-kit/core";
-
 import { Hand } from "./hand";
-
 import { useGame } from "../game-provider";
 import { GameAvatar, PlayerAvatar } from "../game-avatar";
 import { useUser } from "../user-context";
-import { H3, H4, H6 } from "../ui/typography";
+import { H3 } from "../ui/typography";
 
 export function Board() {
   const { gameState, playerState } = useGame();
@@ -51,9 +49,6 @@ export function Board() {
                         <div className="absolute inset-0">
                           <KittenCardBackface />
                         </div>
-                        {player.isCurrentTurn && lastPlayedCard && (
-                          <KittenCardCard card={lastPlayedCard} />
-                        )}
 
                         <div className="absolute left-1 top-1 -translate-x-1/2 -translate-y-1/2">
                           <div className="flex size-20 items-center justify-center rounded-full bg-secondary">

@@ -5,29 +5,26 @@ import { useParams } from "next/navigation";
 
 import {
   createContext,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
   useContext,
   useEffect,
   useState,
 } from "react";
 import { socket } from "@/trpc/socket";
-import { type Player } from "@/models/Player";
-import { GameStatus, type Game } from "@/models/game/Game";
+import { type GameStatus } from "@/models/game/Game";
 import {
   GAME_ACTIONS,
-  GameState,
-  type GameHandler,
+  type GameState,
   type JoinGameHandler,
-  type RejoinGameHandler,
 } from "@/services/GameService";
-import type Deck from "@/models/Card";
 
 import { type PlayerState } from "../services/GameService";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { BaseCardJSON } from "@/models/cards/_BaseCard";
-import { flushSync } from "react-dom";
+import { type BaseCardJSON } from "@/models/cards/_BaseCard";
+import {
+  type ChoosePlayerRequest,
+  GAME_REQUESTS,
+  type SelectCardRequest,
+} from "@/models/game/PlayerManager";
 
 interface GameContext {
   connected: boolean;
@@ -50,6 +47,8 @@ export function GameProvider({ children }: GameProviderProps) {
   const [gameStatus, setGameStatus] = useState<GameStatus | "notFound">(
     "waiting",
   );
+
+  useGameRequest(connected);
 
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
@@ -102,7 +101,8 @@ export function GameProvider({ children }: GameProviderProps) {
       });
 
       socket.on(GAME_ACTIONS.PLAYER_SYNC, (_playerState: PlayerState) => {
-        setLastPlayedCard(_playerState.latestCard);
+        setPlayerState(_playerState);
+
         setTimeout(() => setPlayerState(_playerState), 10);
         setTimeout(() => setLastPlayedCard(null), 10);
       });
@@ -111,6 +111,10 @@ export function GameProvider({ children }: GameProviderProps) {
         socket.off(GAME_ACTIONS.SYNC, (gameState: GameState) => {
           setGameState(gameState);
           setGameStatus(gameState.status);
+        });
+
+        socket.off(GAME_ACTIONS.PLAYER_SYNC, (_playerState: PlayerState) => {
+          setPlayerState(_playerState);
         });
       };
     }
@@ -130,6 +134,37 @@ export function GameProvider({ children }: GameProviderProps) {
       {children}
     </GameContext.Provider>
   );
+}
+
+function useGameRequest(connected: boolean) {
+  const gameId = useGameId();
+  useEffect(() => {
+    socket.on(GAME_REQUESTS.SELECT_CARD, (data: SelectCardRequest) => {
+      console.log("SELECT CARD REQUEST FROM ", data.handSize);
+    });
+
+    socket.on(GAME_REQUESTS.GIVE_CARD, (data: SelectCardRequest) => {
+      console.log("SELECT CARD REQUEST FROM ", data.handSize);
+    });
+
+    socket.on(GAME_REQUESTS.CHOOSE_PLAYER, (data: ChoosePlayerRequest) => {
+      console.log("SELECT PLAYER REQUEST ", data.availablePlayers);
+    });
+
+    return () => {
+      socket.off(GAME_REQUESTS.SELECT_CARD, (data: SelectCardRequest) => {
+        console.log("SELECT CARD REQUEST FROM ", data.handSize);
+      });
+
+      socket.off(GAME_REQUESTS.GIVE_CARD, (data: SelectCardRequest) => {
+        console.log("SELECT CARD REQUEST FROM ", data.handSize);
+      });
+
+      socket.off(GAME_REQUESTS.CHOOSE_PLAYER, (data: ChoosePlayerRequest) => {
+        console.log("SELECT PLAYER REQUEST ", data.availablePlayers);
+      });
+    };
+  }, [gameId, connected]);
 }
 
 export function useGame() {
