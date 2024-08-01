@@ -1,4 +1,5 @@
 import type BaseCard from "../cards/_BaseCard";
+import { BaseCardJSON } from "../cards/_BaseCard";
 import { CardFactory } from "../cards/_CardFactory";
 import Defuse from "../cards/Defuse";
 import ExplodingKitten from "../cards/ExplodingKitten";
@@ -37,7 +38,7 @@ export default class DeckManger {
 
   dealCards(players: Player[]) {
     players.forEach((p) => {
-      p.getHandOfCard().push(new Defuse());
+      p.getHand().push(new Defuse());
 
       Array.from(Array(INITIAL_MAX_AMOUNT_OF_CARDS).keys()).forEach(() => {
         const drawnCard = this.drawCard();
@@ -84,4 +85,30 @@ export default class DeckManger {
   addToDiscardPile(card: BaseCard) {
     this.discardPile.push(card);
   }
+
+  private createCardFromJSON(cardData: BaseCardJSON) {
+    const createdCard = CardFactory.createCard(cardData.type);
+    createdCard.setId(cardData.cardId);
+
+    return createdCard;
+  }
+
+  getState(): DeckManagerState {
+    return {
+      deck: this.deck.map((card) => card.toJSON()),
+      discardPile: this.discardPile.map((card) => card.toJSON()),
+    };
+  }
+
+  setState(state: DeckManagerState) {
+    this.deck = state.deck.map((cardData) => this.createCardFromJSON(cardData));
+    this.discardPile = state.discardPile.map((cardData) =>
+      this.createCardFromJSON(cardData),
+    );
+  }
+}
+
+export interface DeckManagerState {
+  deck: BaseCardJSON[];
+  discardPile: BaseCardJSON[];
 }

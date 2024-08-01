@@ -6,14 +6,17 @@ import { useParams } from "next/navigation";
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { socket } from "@/trpc/socket";
 import { type GameStatus } from "@/models/game/Game";
 import {
   GAME_ACTIONS,
+  PlayerClient,
   type GameState,
   type JoinGameHandler,
 } from "@/services/GameService";
@@ -22,8 +25,11 @@ import { type PlayerState } from "../services/GameService";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   type ChoosePlayerRequest,
+  type ChoosePlayerResponse,
   GAME_REQUESTS,
+  GiveCardResponse,
   type SelectCardRequest,
+  SelectCardResponse,
 } from "@/models/game/PlayerManager";
 
 interface GameContext {
@@ -102,9 +108,6 @@ export function GameProvider({ children }: GameProviderProps) {
 
       socket.on(GAME_ACTIONS.PLAYER_SYNC, (_playerState: PlayerState) => {
         setPlayerState(_playerState);
-
-        setTimeout(() => setPlayerState(_playerState), 10);
-        setTimeout(() => setLastPlayedCard(null), 10);
       });
 
       return () => {
@@ -136,6 +139,15 @@ export function GameProvider({ children }: GameProviderProps) {
   );
 }
 
+export function useGame() {
+  const gameCtx = useContext(GameContext);
+  if (!gameCtx) {
+    throw new Error("useGame can only be used inside a GameContext provider");
+  }
+
+  return gameCtx;
+}
+
 function useGameRequest(connected: boolean) {
   const gameId = useGameId();
   useEffect(() => {
@@ -143,13 +155,7 @@ function useGameRequest(connected: boolean) {
       console.log("SELECT CARD REQUEST FROM ", data.handSize);
     });
 
-    socket.on(GAME_REQUESTS.GIVE_CARD, (data: SelectCardRequest) => {
-      console.log("SELECT CARD REQUEST FROM ", data.handSize);
-    });
-
-    socket.on(GAME_REQUESTS.CHOOSE_PLAYER, (data: ChoosePlayerRequest) => {
-      console.log("SELECT PLAYER REQUEST ", data.availablePlayers);
-    });
+    socket.on(GAME_REQUESTS.GIVE_CARD, (data: SelectCardRequest) => {});
 
     return () => {
       socket.off(GAME_REQUESTS.SELECT_CARD, (data: SelectCardRequest) => {
@@ -159,21 +165,158 @@ function useGameRequest(connected: boolean) {
       socket.off(GAME_REQUESTS.GIVE_CARD, (data: SelectCardRequest) => {
         console.log("SELECT CARD REQUEST FROM ", data.handSize);
       });
-
-      socket.off(GAME_REQUESTS.CHOOSE_PLAYER, (data: ChoosePlayerRequest) => {
-        console.log("SELECT PLAYER REQUEST ", data.availablePlayers);
-      });
     };
   }, [gameId, connected]);
 }
 
-export function useGame() {
-  const gameCtx = useContext(GameContext);
-  if (!gameCtx) {
-    throw new Error("useGame can only be used inside a GameContext provider");
+export function usePlayerSelection() {
+  const gameId = useGameId();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [availablePlayers, setAvailablePlayers] = useState<PlayerClient[]>([]);
+  const onCancelChange = useCancelDialog();
+  onCancelChange((val) => {
+    console.log("SELECT PLAYER", val);
+    setIsDialogOpen(false);
+  });
+
+  function handlePlayerSelect(selectedPlayerId: string) {
+    setIsDialogOpen(false);
+    const response: ChoosePlayerResponse = {
+      selectedPlayerId,
+    };
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, response);
   }
 
-  return gameCtx;
+  function handleCancel() {
+    setIsDialogOpen(false);
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, {
+      error: "Player selection cancelled",
+    });
+  }
+
+  function openPlayerSelection(players: PlayerClient[]) {
+    setAvailablePlayers(players);
+    setIsDialogOpen(true);
+  }
+
+  useEffect(() => {
+    socket.on(
+      GAME_REQUESTS.CHOOSE_PLAYER,
+      (data: { availablePlayers: PlayerClient[] }) => {
+        openPlayerSelection(data.availablePlayers);
+      },
+    );
+
+    return () => {
+      socket.off(GAME_REQUESTS.CHOOSE_PLAYER);
+    };
+  }, [gameId]);
+
+  return {
+    isDialogOpen,
+    availablePlayers,
+    handlePlayerSelect,
+    handleCancel,
+  };
+}
+
+interface GiveCardDialogProps {
+  isDialogOpen: boolean;
+  availableCards: BaseCardJSON[];
+  handleCardSelect(cardId: string): void;
+  handleCancel(): void;
+}
+const GiveCardContext = createContext<GiveCardDialogProps | null>(null);
+
+interface GiveCardProviderProps {
+  children: ReactNode;
+}
+export function GiveCardProvider({ children }: GiveCardProviderProps) {
+  const gameId = useGameId();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [availableCards, setAvailableCards] = useState<BaseCardJSON[]>([]);
+
+  const onCancelChange = useCancelDialog();
+  onCancelChange((val) => {
+    console.log("GIVE CARD", val);
+    setIsDialogOpen(false);
+  });
+
+  function handleCardSelect(cardId: string) {
+    const response: GiveCardResponse = {
+      cardId,
+    };
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, response);
+    setIsDialogOpen(false);
+  }
+
+  function handleCancel() {
+    setIsDialogOpen(false);
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, {
+      error: "Card selection cancelled",
+    });
+  }
+
+  function onCardSelection(cards: BaseCardJSON[]) {
+    setAvailableCards(cards);
+    setIsDialogOpen(true);
+  }
+
+  useEffect(() => {
+    socket.on(
+      GAME_REQUESTS.GIVE_CARD,
+      (data: { availableCards: BaseCardJSON[] }) => {
+        onCardSelection(data.availableCards);
+      },
+    );
+
+    return () => {
+      socket.off(GAME_REQUESTS.GIVE_CARD);
+    };
+  }, [gameId]);
+
+  return (
+    <GiveCardContext.Provider
+      value={{ isDialogOpen, availableCards, handleCardSelect, handleCancel }}
+    >
+      {children}
+    </GiveCardContext.Provider>
+  );
+}
+
+export function useGiveCard() {
+  const giveCardCtx = useContext(GiveCardContext);
+  if (!giveCardCtx) {
+    throw new Error("useGiveCard can only be used inside a GiveCard provider");
+  }
+
+  return giveCardCtx;
+}
+
+type CancelCallback = (val: boolean) => void;
+function useCancelDialog(): (callback: CancelCallback) => void {
+  const gameId = useGameId();
+  const callbackRef = useRef<CancelCallback | null>(null);
+
+  useEffect(() => {
+    const handleCancelDialogs = () => {
+      if (callbackRef.current) {
+        callbackRef.current(false);
+      }
+    };
+
+    socket.on(GAME_REQUESTS.CANCEL_DIALOG, handleCancelDialogs);
+
+    return () => {
+      socket.off(GAME_REQUESTS.CANCEL_DIALOG, handleCancelDialogs);
+    };
+  }, [gameId]);
+
+  const onCancelChange = useCallback((callback: CancelCallback) => {
+    callbackRef.current = callback;
+  }, []);
+
+  return onCancelChange;
 }
 
 export function useGameId() {

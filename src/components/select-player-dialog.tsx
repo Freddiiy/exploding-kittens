@@ -2,53 +2,72 @@
 
 import {
   AlertDialog,
+  AlertDialogContent,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { AlertDialogContent } from "@radix-ui/react-alert-dialog";
 import { PlayerAvatar } from "./game-avatar";
 import { type PlayerClient } from "@/services/GameService";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { H3 } from "./ui/typography";
-import { createRoot } from "react-dom/client";
+
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface PlayerSelectionDialogProps {
+  open: boolean;
   availablePlayers: PlayerClient[];
   onSelect: (selectedPlayerId: string) => void;
   onCancel?: () => void;
 }
 
 export function PlayerSelectionDialog({
+  open,
   availablePlayers,
   onSelect,
   onCancel,
 }: PlayerSelectionDialogProps) {
-  const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const [show, setShow] = useState(true);
   function handleSelect(selectedPlayerId: string) {
     onSelect(selectedPlayerId);
+    setSelectedPlayerId("");
   }
 
+  console.log("IS PLAYER SELECT OPEN: ", open);
+
   return (
-    <AlertDialog open>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Choose a player</AlertDialogTitle>
-      </AlertDialogHeader>
+    <AlertDialog
+      open={open && show}
+      onOpenChange={(val) => {
+        if (!val) setShow(false);
+      }}
+    >
       <AlertDialogContent>
-        <div className="flex items-center justify-center gap-4">
-          {availablePlayers.map((player) => (
-            <Button
-              type="button"
-              variant={"ghost"}
-              key={player.id}
-              onClick={() => setSelectedPlayerId(player.id)}
-            >
-              <PlayerAvatar user={player} />
-            </Button>
-          ))}
+        <AlertDialogHeader>
+          <AlertDialogTitle>Choose a player</AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="space-y-4">
+          <div className="flex h-full items-center justify-center gap-4">
+            {availablePlayers.map((player) => (
+              <Button
+                type="button"
+                variant={"ghost"}
+                key={player.id}
+                onClick={() => setSelectedPlayerId(player.id)}
+                className={cn("h-full")}
+              >
+                <PlayerAvatar
+                  user={player}
+                  selected={selectedPlayerId === player.id}
+                />
+              </Button>
+            ))}
+          </div>
         </div>
-        <div>
+        <AlertDialogFooter>
           <Button
             type="button"
             size={"lg"}
@@ -58,42 +77,34 @@ export function PlayerSelectionDialog({
           >
             <H3>Confirm</H3>
           </Button>
-        </div>
+        </AlertDialogFooter>
+        {open && show && (
+          <div className="relative inset-0 h-full w-full">
+            <Button
+              type="button"
+              variant={"secondary"}
+              size={"lg"}
+              className="absolute bottom-3 left-3 z-50 text-2xl"
+              onClick={() => setShow((prev) => !prev)}
+            >
+              {show ? "Hide" : "Show"}
+            </Button>
+          </div>
+        )}
       </AlertDialogContent>
+      {open && !show && (
+        <div className="relative inset-0 h-full w-full">
+          <Button
+            type="button"
+            variant={"secondary"}
+            size={"lg"}
+            className="absolute bottom-3 left-3 z-50 text-2xl"
+            onClick={() => setShow((prev) => !prev)}
+          >
+            {show ? "Hide" : "Show"}
+          </Button>
+        </div>
+      )}
     </AlertDialog>
   );
-}
-
-export function showPlayerSelectionDialog(
-  availablePlayers: PlayerClient[],
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const dialogRoot = document.createElement("div");
-    document.body.appendChild(dialogRoot);
-
-    const root = createRoot(dialogRoot);
-
-    const closeDialog = () => {
-      root.unmount();
-      document.body.removeChild(dialogRoot);
-    };
-
-    const handleSelect = (selectedPlayerId: string) => {
-      closeDialog();
-      resolve(selectedPlayerId);
-    };
-
-    const handleCancel = () => {
-      closeDialog();
-      reject(new Error("Player selection cancelled"));
-    };
-
-    root.render(
-      <PlayerSelectionDialog
-        availablePlayers={availablePlayers}
-        onSelect={handleSelect}
-        onCancel={handleCancel}
-      />,
-    );
-  });
 }

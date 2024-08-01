@@ -5,7 +5,7 @@ export default class TurnManager {
   // clockwise and counter clickwise indicators.
   private turnDirection: 1 | -1 = 1;
   private playerOrder: string[] = [];
-  private turnsOnNextPlayer: number = 0;
+  private extraTurns: number = 0;
 
   initializePlayerOrder(players: Player[]) {
     this.playerOrder = players.map((player) => player.getId());
@@ -58,7 +58,35 @@ export default class TurnManager {
     this.turnDirection *= -1;
   }
 
-  addTurnsToNextPlayer(turns: number) {
-    this.turnsOnNextPlayer += turns;
+  getExtraTurns(): number {
+    return this.extraTurns;
   }
+
+  addExtraTurns(turns: number) {
+    this.extraTurns += turns;
+  }
+
+  setExtraTurns(turns: number) {
+    this.extraTurns = turns;
+  }
+
+  getState(): TurnManagerState {
+    return {
+      currentPlayerId: this.currentPlayerId,
+      extraTurns: this.extraTurns,
+      playerOrder: [...this.playerOrder],
+    };
+  }
+
+  setState(state: TurnManagerState) {
+    this.currentPlayerId = state.currentPlayerId;
+    this.extraTurns = state.extraTurns;
+    this.playerOrder = [...state.playerOrder];
+  }
+}
+
+export interface TurnManagerState {
+  currentPlayerId: string | null;
+  extraTurns: number;
+  playerOrder: string[];
 }

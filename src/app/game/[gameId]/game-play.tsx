@@ -1,11 +1,29 @@
 "use client";
 
-import { useGame } from "@/components/game-provider";
+import {
+  useGame,
+  useGiveCard,
+  usePlayerSelection,
+} from "@/components/game-provider";
 import { Lobby } from "./lobby";
 import { Board } from "@/components/kittens/board";
+import { PlayerSelectionDialog } from "@/components/select-player-dialog";
+import { GiveCardDialog } from "@/components/give-cards-dialog";
 
 export function GamePlay() {
   const { gameState, gameStatus } = useGame();
+  const {
+    isDialogOpen: isPlayerSelectionOpen,
+    availablePlayers,
+    handlePlayerSelect,
+    handleCancel: handleCancelPlayerSelect,
+  } = usePlayerSelection();
+  const {
+    isDialogOpen: isGiveCardOpen,
+    availableCards,
+    handleCardSelect: handleGiveCardSelect,
+    handleCancel: handleCancelGiveCard,
+  } = useGiveCard();
 
   if (gameStatus === "notFound") {
     return <div>Game not found</div>;
@@ -19,5 +37,21 @@ export function GamePlay() {
     return <Lobby />;
   }
 
-  return <Board />;
+  return (
+    <>
+      <Board />
+      <PlayerSelectionDialog
+        open={isPlayerSelectionOpen}
+        availablePlayers={availablePlayers}
+        onSelect={handlePlayerSelect}
+        onCancel={handleCancelPlayerSelect}
+      />
+      <GiveCardDialog
+        open={isGiveCardOpen}
+        availableCards={availableCards}
+        onSelect={handleGiveCardSelect}
+        onCancel={handleCancelGiveCard}
+      />
+    </>
+  );
 }

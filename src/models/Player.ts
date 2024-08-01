@@ -47,12 +47,16 @@ export class Player {
     return this.avatar;
   }
 
-  getHandOfCard() {
+  getHand() {
     return this.handOfCards;
   }
 
+  setHand(cards: BaseCard[]) {
+    this.handOfCards = cards;
+  }
+
   getHandSize() {
-    return this.getHandOfCard().length;
+    return this.getHand().length;
   }
 
   addCardToHand(card: BaseCard) {
@@ -82,7 +86,7 @@ export class Player {
       id: this.getId(),
       username: this.getUsername(),
       avatar: this.getAvatar(),
-      handSize: this.getHandOfCard().length,
+      handSize: this.getHand().length,
       lastPlayedCard: this.getLastPlayedCard()?.toJSON() ?? null,
     };
 

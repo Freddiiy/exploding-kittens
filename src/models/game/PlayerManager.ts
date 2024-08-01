@@ -1,4 +1,4 @@
-import BaseCard from "../cards/_BaseCard";
+import BaseCard, { BaseCardJSON } from "../cards/_BaseCard";
 import { type Player } from "../Player";
 import GameService, { PlayerClient } from "../../services/GameService";
 
@@ -75,17 +75,11 @@ export default class PlayerManager {
     return this.disconnectedPlayers.has(playerId);
   }
 
-  async selectPlayer(currentPlayer: Player) {
-    const otherPlayers = this.players.filter((p) => p !== currentPlayer);
-    // This would typically involve sending a request to the client and waiting for a response
-    // For now, we'll just return the first other player
-    return otherPlayers.at(0) ?? null;
-  }
-
-  async selectCardFromPlayer(fromPlayer: Player, toPlayer: Player) {
+  async requestSelectCardFromPlayer(fromPlayer: Player, toPlayer: Player) {
     const res = await this.sendPlayerRequest(
       fromPlayer.getId(),
       GAME_REQUESTS.SELECT_CARD,
+      { handSize: fromPlayer.getHandSize() },
     );
 
     const cardIdx = res.selectedCardIndex;
@@ -95,17 +89,42 @@ export default class PlayerManager {
       cardIdx >= 0 &&
       cardIdx < fromPlayer.getHandSize()
     ) {
-      const foundCard = fromPlayer.getHandOfCard().at(cardIdx);
+      const foundCard = fromPlayer.getHand().at(cardIdx);
       if (!foundCard) {
         throw new Error("No card found");
       }
 
       const selectedCard = fromPlayer.getCardFromHand(foundCard.getId());
-      return selectedCard;
+
+      if (!selectedCard) {
+        throw new Error(
+          "Card not found on " + fromPlayer.getUsername() + "'s hand",
+        );
+      }
+      this.transferCard(fromPlayer, toPlayer, selectedCard);
+    }
+  }
+
+  async requestGiveCardToPlayer(fromPlayer: Player, toPlayer: Player) {
+    const res = await this.sendPlayerRequest(
+      fromPlayer.getId(),
+      GAME_REQUESTS.GIVE_CARD,
+      {
+        availableCards: fromPlayer.getHand().map((card) => card.toJSON()),
+      },
+    );
+
+    const card = fromPlayer.getCardFromHand(res.cardId);
+
+    if (!card) {
+      throw new Error(
+        "Card not found on " + fromPlayer.getUsername() + "'s hand",
+      );
     }
 
-    return null;
+    this.transferCard(fromPlayer, toPlayer, card);
   }
+
   async sendPlayerRequest<T extends keyof ClientRequestMap>(
     playerId: string,
     requestType: T,
@@ -128,7 +147,7 @@ export default class PlayerManager {
     });
   }
 
-  async choosePlayer(currentPlayer: Player) {
+  async requestChoosePlayer(currentPlayer: Player) {
     try {
       const otherPlayers = this.getPlayers().filter((p) => p !== currentPlayer);
       const response = await this.sendPlayerRequest(
@@ -161,7 +180,7 @@ export interface SelectCardResponse {
 }
 
 export interface GiveCardRequest {
-  handSize: number;
+  availableCards: BaseCardJSON[];
 }
 
 export interface GiveCardResponse {
@@ -180,6 +199,7 @@ export const GAME_REQUESTS = {
   SELECT_CARD: "selectCard",
   GIVE_CARD: "giveCard",
   CHOOSE_PLAYER: "choosePlayer",
+  CANCEL_DIALOG: "cancelDialogs",
 } as const;
 
 export interface ClientRequestMap {

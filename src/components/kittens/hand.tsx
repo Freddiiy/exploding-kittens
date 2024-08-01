@@ -8,12 +8,14 @@ import {
   useDndIsReallyActiveId,
 } from "./card";
 import { useUser } from "../user-context";
+import { useGiveCard } from "../game-provider";
 
 interface HandProps {
   cards: BaseCardJSON[];
 }
 
 export function Hand(props: HandProps) {
+  const { isDialogOpen: isGiveCardOpen } = useGiveCard();
   const ref = useRef<HTMLDivElement | null>(null);
   const [handWidth, setHandWidth] = useState(0);
   const virtualFanWidth = Math.min(handWidth, props.cards.length * 200);
@@ -93,34 +95,36 @@ export function Hand(props: HandProps) {
 
       {/* Preview layer */}
 
-      <LayoutGroup>
-        <AnimatePresence key={"preview-card-" + hoveredCardId}>
-          {hoveredCardId && !isDragActive && (
-            <motion.div
-              key={hoveredCard.cardId}
-              initial={{
-                x: hoveredCardPosition.x,
-                y: -20,
-              }}
-              animate={{
-                scale: 1.5,
-                x: hoveredCardPosition.x,
-                y: -150,
-              }}
-              exit={{
-                opacity: 0,
-                x: hoveredCardPosition.x,
-                y: -50,
-              }}
-              transition={{ duration: 0.1 }}
-              className="pointer-events-none absolute"
-              style={{ zIndex: 10 }}
-            >
-              <KittenCardSkeleton card={hoveredCard} disabled={true} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </LayoutGroup>
+      {!isGiveCardOpen && (
+        <LayoutGroup>
+          <AnimatePresence key={"preview-card-" + hoveredCardId}>
+            {hoveredCardId && !isDragActive && (
+              <motion.div
+                key={hoveredCard.cardId}
+                initial={{
+                  x: hoveredCardPosition.x,
+                  y: -20,
+                }}
+                animate={{
+                  scale: 1.5,
+                  x: hoveredCardPosition.x,
+                  y: -150,
+                }}
+                exit={{
+                  opacity: 0,
+                  x: hoveredCardPosition.x,
+                  y: -50,
+                }}
+                transition={{ duration: 0.1 }}
+                className="pointer-events-none absolute"
+                style={{ zIndex: 10 }}
+              >
+                <KittenCardSkeleton card={hoveredCard} disabled={true} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </LayoutGroup>
+      )}
     </div>
   );
 }

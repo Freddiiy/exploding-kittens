@@ -26,6 +26,10 @@ export default abstract class BaseCard {
     return this.id;
   }
 
+  setId(newId: string) {
+    this.id = newId;
+  }
+
   getType(): CardType {
     return this.type;
   }

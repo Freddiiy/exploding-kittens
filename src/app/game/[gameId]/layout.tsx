@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import { GameProvider } from "@/components/game-provider";
+import { GameProvider, GiveCardProvider } from "@/components/game-provider";
 
 export const metadata: Metadata = {
   title: "Exploding Kittens",
@@ -10,5 +10,9 @@ export const metadata: Metadata = {
 export default function GameLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <GameProvider>{children}</GameProvider>;
+  return (
+    <GameProvider>
+      <GiveCardProvider>{children}</GiveCardProvider>
+    </GameProvider>
+  );
 }

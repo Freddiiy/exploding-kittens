@@ -13,7 +13,7 @@ export default class GameService {
     this.io = io;
     this.socketHandler();
   }
-  socketHandler() {
+  private socketHandler() {
     this.io.on("connection", (socket) => {
       this.handleStartGame(socket);
       this.handleCreateGame(socket);
@@ -62,22 +62,17 @@ export default class GameService {
             throw new Error("Player not found.");
           }
 
-          if (!game.isPlayersTurn(currentPlayer)) {
-            throw new Error("it's not your turn.");
-          }
-
           if (!card) {
             throw new Error("Card not found in player's hand.");
           }
 
           await game.playCard(currentPlayer, card);
 
-          currentPlayer.removeCardFromHand(cardId);
-
           game.getDeckManger().addToDiscardPile(card);
           this.sendGameState(game.getId());
         } catch (error) {
           const err = error as Error;
+          console.error("Error in playCard", err);
           socket.emit(GAME_ACTIONS.ERROR, { message: err.message });
         }
       },
@@ -217,7 +212,7 @@ export default class GameService {
     });
   }
 
-  private sendGameState(gameId: string) {
+  sendGameState(gameId: string) {
     const game = this.getGame(gameId);
 
     const players = game.getPlayerManager().getPlayers();
@@ -260,9 +255,7 @@ export default class GameService {
             latestCard: !game.isPlayersTurn(player)
               ? (game.getDeckManger().getLastDrawnCard()?.toJSON() ?? null)
               : null,
-            playerHandOfCards: player
-              .getHandOfCard()
-              .map((card) => card.toJSON()),
+            playerHandOfCards: player.getHand().map((card) => card.toJSON()),
             isPlayersTurn: game.isPlayersTurn(player),
           };
 
@@ -282,11 +275,20 @@ export default class GameService {
       game.getPlayerManager().getPlayerById(playerId),
     );
 
-    if (game) {
+    if (!game) {
       callback(null);
       throw new Error("Game is not found");
     }
-    const playerSocket = this.io.sockets.sockets.get(playerId);
+    const playerSocketId = game
+      .getPlayerManager()
+      .getPlayerById(playerId)
+      ?.getSocketId();
+
+    if (!playerSocketId) {
+      throw new Error("Player not found");
+    }
+
+    const playerSocket = this.io.sockets.sockets.get(playerSocketId);
     if (playerSocket) {
       playerSocket.emit(requestType, data);
       playerSocket.once(GAME_ACTIONS.CLIENT_RESPONSE, (response) => {
@@ -305,6 +307,10 @@ export default class GameService {
     }
 
     return game;
+  }
+
+  getIO() {
+    return this.io;
   }
 }
 
