@@ -51,24 +51,31 @@ export default class GameService {
   private handlePlayCard(socket: Socket) {
     socket.on(
       GAME_ACTIONS.PLAY_CARD,
-      async ({ gameId, playerId, cardId }: PlayCardHandler) => {
+      async ({ gameId, playerId, cardIds: cardIds }: PlayCardHandler) => {
         try {
           const game = this.getGame(gameId);
           const currentPlayer = game.getPlayerManager().getPlayerById(playerId);
-
-          const card = currentPlayer?.getCardFromHand(cardId);
 
           if (!currentPlayer) {
             throw new Error("Player not found.");
           }
 
-          if (!card) {
-            throw new Error("Card not found in player's hand.");
+          const cards = cardIds
+            .map((cardId) => currentPlayer.getCardFromHand(cardId))
+            .filter((card) => card !== undefined);
+
+          if (cards.length !== cardIds.length) {
+            throw new Error("One or more cards not found in player's hand.");
           }
 
-          await game.playCard(currentPlayer, card);
+          if (cards.length < 1 || cards.length > 3) {
+            throw new Error("You must play 1 to 3 cards.");
+          }
 
-          game.getDeckManger().addToDiscardPile(card);
+          await game.playCard(currentPlayer, cards);
+
+          cards.map((card) => game.getDeckManger().addToDiscardPile(card));
+
           this.sendGameState(game.getId());
           this.io.to(gameId).emit(GAME_ACTIONS.PLAY_CARD);
         } catch (error) {
@@ -328,7 +335,7 @@ export interface DrawCardHandler {
 export interface PlayCardHandler {
   gameId: string;
   playerId: string;
-  cardId: string;
+  cardIds: string[];
 }
 
 export interface PlayerClient {

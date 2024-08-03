@@ -101,6 +101,7 @@ export function KittenCardCard({
           ? "player-" + gameState?.currentPlayerId + "card-" + card.cardId
           : undefined
       }
+      className={cn(isDragActive && "drop-shadow-2xl")}
     >
       <KittenCardSkeleton card={card} disabled={disabled} flipped={flipped} />
     </motion.div>
@@ -112,6 +113,7 @@ export function KittenCardSkeleton({
   disabled = false,
   flipped = false,
 }: KittenCardFullProps) {
+  const isDragActive = useDndIsReallyActiveId(card.cardId);
   const [isFlipped, setIsFlipped] = useState(flipped);
   const [shouldAnimate, setShouldAnimate] = useState(false);
   useEffect(() => {
@@ -126,7 +128,10 @@ export function KittenCardSkeleton({
       value={{ card: card, disabled, flipped: flipped }}
     >
       <motion.div
-        className="relative h-card-height w-card-width"
+        className={cn(
+          "relative h-card-height w-card-width",
+          isDragActive && "shadow-2xl",
+        )}
         style={{ transformStyle: "preserve-3d" }}
         initial={{ rotateY: flipped ? 180 : 0 }}
         animate={shouldAnimate && { rotateY: isFlipped ? 180 : 0 }}

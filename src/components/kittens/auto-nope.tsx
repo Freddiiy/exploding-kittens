@@ -64,7 +64,7 @@ export function NopeTimerProvider({ children }: NopeTimerProviderProps) {
       if (newProgress === 0) {
         setIsTimerCompleted(true);
       }
-    }, 16); // Update progress every 16ms
+    }, 100); // Update progress every 100ms
 
     return () => clearInterval(interval);
   }, [timerEnd]);
@@ -86,7 +86,7 @@ export function NopeTimerProvider({ children }: NopeTimerProviderProps) {
         );
 
         if (nopeCard && nopeCard.type === CardType.NOPE) {
-          playCard(gameState.id, user.userId, nopeCard.cardId);
+          playCard(gameState.id, user.userId, [nopeCard.cardId]);
         }
       }
     }

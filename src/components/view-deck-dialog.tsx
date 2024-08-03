@@ -36,7 +36,7 @@ import { useNopeTimer } from "./kittens/auto-nope";
 interface ViewDeckDialogProps {
   open: boolean;
   cards: BaseCardJSON[];
-  onConfirm?: () => void;
+  onConfirm?: (cardId?: string) => void;
   onCancel?: () => void;
 }
 
@@ -47,6 +47,7 @@ export function ViewDeckDialog({
   onCancel,
 }: ViewDeckDialogProps) {
   const [show, setShow] = useState(true);
+
   function handleClick() {
     onConfirm?.();
   }

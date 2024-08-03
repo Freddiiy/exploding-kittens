@@ -10,6 +10,25 @@ export default abstract class CatCard extends BaseCard {
     const mechanics =
       "These cards are powerless on their own, but can be used in Special Combos.";
     super(type, name, description, mechanics);
+    this._isCatCard = true;
   }
   play(game: Game, player: Player): void {}
+
+  static async handleCatCardCombo(
+    game: Game,
+    player: Player,
+    cards: BaseCard[],
+  ) {
+    const targetPlayer = await game
+      .getRequestManager()
+      .requestChoosePlayer(player);
+
+    if (!targetPlayer) {
+      throw new Error("Taget player does not exist");
+    }
+
+    await game
+      .getRequestManager()
+      .requestSelectCardFromPlayer(targetPlayer, player);
+  }
 }

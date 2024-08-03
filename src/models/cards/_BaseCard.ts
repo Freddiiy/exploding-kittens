@@ -9,6 +9,7 @@ export default abstract class BaseCard {
   protected name: string;
   protected description: string;
   protected mechanics: string;
+  protected _isCatCard: boolean;
   constructor(
     type: CardType,
     name: string,
@@ -20,6 +21,7 @@ export default abstract class BaseCard {
     this.name = name;
     this.description = description;
     this.mechanics = mechanics;
+    this._isCatCard = false;
   }
 
   getId(): string {
@@ -42,6 +44,10 @@ export default abstract class BaseCard {
     return this.description;
   }
 
+  isCatCard() {
+    return this._isCatCard;
+  }
+
   abstract play(game: Game, player: Player): void;
 
   toJSON() {
@@ -51,6 +57,7 @@ export default abstract class BaseCard {
       name: this.name,
       description: this.description,
       mechanics: this.mechanics,
+      isCatCard: this.isCatCard(),
     };
     return cardJSON;
   }
@@ -62,4 +69,5 @@ export type BaseCardJSON = {
   name: string;
   description: string;
   mechanics: string;
+  isCatCard: boolean;
 };

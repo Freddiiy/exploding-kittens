@@ -67,7 +67,7 @@ export function GiveCardDialog({
                 items={cards}
                 render={(item) => (
                   <button
-                    className={cn("relative h-full w-full")}
+                    className="relative h-full w-full"
                     onClick={() => setSelectedCardId(item.cardId)}
                   >
                     <KittenCardCard card={item} />

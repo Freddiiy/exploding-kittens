@@ -117,7 +117,7 @@ export class Game {
     }
   }
 
-  async playCard(player: Player, card: BaseCard) {
+  async playCard(player: Player, card: BaseCard[]) {
     await this.actionManager.playCard(player, card);
   }
 

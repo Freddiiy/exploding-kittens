@@ -7,6 +7,7 @@ import type PlayerManager from "./PlayerManager";
 
 import { type StateManager } from "./StateManager";
 import { GAME_REQUESTS } from "./RequestManager";
+import CatCard from "../cards/_CatCard";
 
 export const NOPE_TIMER = 5500;
 
@@ -30,15 +31,15 @@ export class ActionManager {
     this.stateManager = stateManager;
   }
 
-  async playCard(player: Player, card: BaseCard) {
-    if (card.getType() === CardType.NOPE) {
-      await this.handleNopeCard(player, card);
+  async playCard(player: Player, cards: BaseCard[]) {
+    if (cards.length === 1 && cards.at(0)?.getType() === CardType.NOPE) {
+      await this.handleNopeCard(player, cards.at(0)!);
     } else {
-      await this.initiateAction(player, card);
+      await this.initiateAction(player, cards);
     }
   }
 
-  private async initiateAction(player: Player, card: BaseCard) {
+  private async initiateAction(player: Player, cards: BaseCard[]) {
     if (!this.game.isPlayersTurn(player)) {
       throw new Error("It's not your turn");
     }
@@ -47,14 +48,15 @@ export class ActionManager {
       throw new Error("Nope timer is active");
     }
 
-    if (!player.hasCard(card.getId())) {
-      throw new Error("You don't have this card");
+    if (!cards.every((card) => player.hasCard(card.getId()))) {
+      throw new Error("You don't have one or more of these cards");
     }
-    player.removeCardFromHand(card.getId());
+
+    cards.forEach((card) => player.removeCardFromHand(card.getId()));
 
     this.currentAction = {
       player: player,
-      card: card,
+      cards: cards,
       nopeCount: 0,
       originalPlayer: player,
     };
@@ -118,12 +120,20 @@ export class ActionManager {
 
   private async executeAction(action: NonNullable<typeof this.currentAction>) {
     try {
-      await action.card.play(this.game, action.originalPlayer);
+      if (action.cards.length === 1) {
+        await action.cards.at(0)?.play(this.game, action.originalPlayer);
+      } else {
+        // Handle cat card combo
+        await CatCard.handleCatCardCombo(
+          this.game,
+          action.originalPlayer,
+          action.cards,
+        );
+      }
     } catch (error) {
       const err = error as Error;
       console.error("Error executing action:", err);
       throw new Error("Error executing action:" + err);
-      // Handle any errors that occur during card execution
     }
   }
 
@@ -145,7 +155,7 @@ export class ActionManager {
 
       playerSocket.emit("actionInitiated", {
         playerName: this.currentAction?.player.getUsername(),
-        cardType: this.currentAction?.card.getType(),
+        cardType: this.currentAction?.cards.map((card) => card.getId()),
       });
     });
   }
@@ -191,7 +201,7 @@ export class ActionManager {
 
       playerSocket.emit("actionNoped", {
         playerName: this.currentAction?.player.getUsername(),
-        cardType: this.currentAction?.card.getType(),
+        cardType: this.currentAction?.cards.map((card) => card.getId()),
       });
     });
   }
@@ -216,7 +226,7 @@ export class ActionManager {
         playerSocket.emit("actionResolved", {
           wasNoped: this.currentAction!.nopeCount % 2 !== 0,
           playerName: this.currentAction!.originalPlayer.getUsername(),
-          cardType: this.currentAction!.card.getType(),
+          cardType: this.currentAction?.cards.map((card) => card.getId()),
         });
       }
     });
@@ -245,7 +255,7 @@ export class ActionManager {
 
 interface CurrentAction {
   player: Player;
-  card: BaseCard;
+  cards: BaseCard[];
   nopeCount: number;
   originalPlayer: Player;
 }

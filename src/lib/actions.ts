@@ -7,13 +7,13 @@ import {
 } from "@/services/GameService";
 import { socket } from "@/trpc/socket";
 
-export function playCard(gameId: string, playerId: string, cardId: string) {
-  const cardToPlay: PlayCardHandler = {
+export function playCard(gameId: string, playerId: string, cardIds: string[]) {
+  const cardsToPlay: PlayCardHandler = {
     gameId,
     playerId,
-    cardId,
+    cardIds,
   };
-  socket.emit(GAME_ACTIONS.PLAY_CARD, cardToPlay);
+  socket.emit(GAME_ACTIONS.PLAY_CARD, cardsToPlay);
 }
 
 export function drawCard(gameId: string, playerId: string) {

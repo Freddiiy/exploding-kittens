@@ -87,8 +87,8 @@ export default class DeckManger {
   }
 
   viewTopCards(n: number) {
-    const deckCopy = [...this.getDeck()];
-    return deckCopy.slice(0, n);
+    const deckCopy = [...this.getDeck()].slice(-n);
+    return deckCopy.reverse();
   }
 
   private createCardFromJSON(cardData: BaseCardJSON) {

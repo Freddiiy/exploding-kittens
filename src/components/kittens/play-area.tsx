@@ -1,25 +1,19 @@
 import {
-  UniqueIdentifier,
-  useDndContext,
+  type UniqueIdentifier,
   useDndMonitor,
   useDroppable,
 } from "@dnd-kit/core";
 import { useUser } from "../user-context";
 import { cn } from "@/lib/utils";
-import { H2, H3 } from "../ui/typography";
-import {
-  KittenCard,
-  KittenCardBackface,
-  KittenCardCard,
-  KittenCardSkeleton,
-} from "./card";
-import { drawCard, playCard } from "@/lib/actions";
+import { H2 } from "../ui/typography";
+import { KittenCard, KittenCardBackface, KittenCardCard } from "./card";
+import { drawCard, playCard as playCards } from "@/lib/actions";
 import { useGame } from "../game-provider";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Card } from "../ui/card";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { NopeTimer, useNopeTimer } from "./auto-nope";
+import { SelectCardDialog } from "../select-card-dialog";
+import { Card } from "../ui/card";
 
 export function PlayArea() {
   const { gameState, playerState, lastPlayedCard } = useGame();
@@ -32,6 +26,19 @@ export function PlayArea() {
   });
 
   const [parent, setParent] = useState<UniqueIdentifier | null>(null);
+  const [isSelectCardsDialogOpen, setSelectCardsDialogOpen] = useState(false);
+  function getAvailableCards() {
+    return (
+      playerState?.playerHandOfCards
+        .filter((x) => parent?.toString() === x.cardId)
+        .filter(
+          (card) =>
+            playerState.playerHandOfCards.find(
+              (card) => card.cardId === parent?.toString(),
+            )?.type === card.type,
+        ) ?? []
+    );
+  }
 
   useDndMonitor({
     onDragEnd(event) {
@@ -40,9 +47,15 @@ export function PlayArea() {
         const card = playerState?.playerHandOfCards.find(
           (card) => card.cardId === cardId,
         );
+
         if (card && gameState?.id) {
           setParent(event.over ? event.over.id : null);
-          playCard(gameState.id, user.userId, cardId);
+
+          if (card.isCatCard) {
+            setSelectCardsDialogOpen(true);
+          } else {
+            playCards(gameState.id, user.userId, [cardId]);
+          }
         }
       }
     },
@@ -91,7 +104,6 @@ export function PlayArea() {
             </div>
 
             <button
-              ref={drawRef}
               className={cn(
                 "group relative flex h-card-height w-card-width items-center justify-center rounded-lg outline-dashed outline-2 outline-offset-2 outline-primary transition-all duration-300",
                 isOverDraw && "is-over outline-green-600",
@@ -140,6 +152,18 @@ export function PlayArea() {
           </AnimatePresence>
         </div>
       </div>
+      <SelectCardDialog
+        open={isSelectCardsDialogOpen}
+        onOpenChange={setSelectCardsDialogOpen}
+        cards={getAvailableCards()}
+        onConfirm={(cardIds) => {
+          const gameId = gameState?.id;
+          const parentCardId = parent?.toString();
+          if (gameId && parentCardId) {
+            playCards(gameId, user.userId, [parentCardId, ...(cardIds ?? [])]);
+          }
+        }}
+      />
     </div>
   );
 }
