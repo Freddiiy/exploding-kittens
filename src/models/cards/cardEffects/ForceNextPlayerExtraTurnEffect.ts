@@ -1,14 +1,18 @@
 import { type Game } from "@/models/game/Game";
 import { type Player } from "@/models/Player";
-import { CardEffect } from "./CardEffect";
+import { type CardEffect } from "./CardEffect";
+import { AttackType } from "@/models/game/TurnManager";
 
-export class ForceNextPlayerExtraTurnEffect implements CardEffect {
+export class ForcePlayerExtraTurnEffect implements CardEffect {
   private turns: number;
-
-  constructor(turns: number = 2) {
+  private targetPlayerId: string | null;
+  constructor(turns: number = 2, targetPlayerId: string | null = null) {
     this.turns = turns;
+    this.targetPlayerId = targetPlayerId;
   }
-  apply(game: Game, player: Player): void {
-    game.getTurnManger().addExtraTurns(2);
+  apply(game: Game, player: Player) {
+    game
+      .getTurnManger()
+      .addAttack(this.turns, AttackType.NORMAL, this.targetPlayerId);
   }
 }

@@ -32,7 +32,7 @@ interface NopeTimerProviderProps {
   children: ReactNode;
 }
 
-const timerOffset = 0;
+const timerOffset = 1500;
 const nopeTimer = NOPE_TIMER - timerOffset;
 export function NopeTimerProvider({ children }: NopeTimerProviderProps) {
   const [isTimerCompleted, setIsTimerCompleted] = useState(false);
@@ -64,7 +64,7 @@ export function NopeTimerProvider({ children }: NopeTimerProviderProps) {
       if (newProgress === 0) {
         setIsTimerCompleted(true);
       }
-    }, 100); // Update progress every 100ms
+    }, 16); // Update progress every 16ms
 
     return () => clearInterval(interval);
   }, [timerEnd]);

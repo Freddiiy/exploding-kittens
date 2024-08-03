@@ -80,10 +80,7 @@ export class ActionManager {
     // Nope is active
     if (this.currentAction.nopeCount % 2 !== 0) {
       this.cancelCurrentDialogs();
-      if (this.currentAction.nopeCount > 1) {
-        // Only restore state if it's not the first Nope
-        this.stateManager.restoreState(this.game);
-      }
+      this.stateManager.restoreState(this.game);
     } else {
       // Nope is countered (Yup)
       await this.executeAction(this.currentAction);

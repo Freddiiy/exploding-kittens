@@ -103,7 +103,7 @@ export default class GameService {
           }
 
           currentPlayer.addCardToHand(card);
-          game.getTurnManger().endTurn(game.getPlayerManager().getPlayers());
+          await game.getTurnManger().endTurn();
           callback?.(card.toJSON());
           this.sendGameState(game.getId());
         } catch (error) {

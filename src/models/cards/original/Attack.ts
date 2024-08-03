@@ -1,9 +1,8 @@
-import { type Game } from "@/models/game/Game";
 import { type Player } from "@/models/Player";
 import ActionCard from "../_ActionCard";
 import { CardType } from "../_CardType";
 import { CardEffect } from "../cardEffects/CardEffect";
-import { ForceNextPlayerExtraTurnEffect } from "../cardEffects/ForceNextPlayerExtraTurnEffect";
+import { ForcePlayerExtraTurnEffect } from "../cardEffects/ForceNextPlayerExtraTurnEffect";
 import { EndTurnWithoutDrawingEffect } from "../cardEffects/EndTurnWithoutDrawingEffect";
 
 export default class Attack extends ActionCard {
@@ -20,7 +19,7 @@ export default class Attack extends ActionCard {
   }
 
   setUpEffects() {
-    this.addEffect(new ForceNextPlayerExtraTurnEffect(2));
+    this.addEffect(new ForcePlayerExtraTurnEffect(2));
     this.addEffect(new EndTurnWithoutDrawingEffect());
   }
 }

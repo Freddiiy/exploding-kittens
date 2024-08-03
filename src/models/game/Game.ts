@@ -16,13 +16,6 @@ export interface GameSettings {
   expansions: Expansion[];
 }
 
-interface CurrentAction {
-  player: Player;
-  card: BaseCard;
-  nopeCount: number;
-  originalPlayer: Player;
-}
-
 export type GameStatus = "waiting" | "inProgress" | "ended";
 export class Game {
   private gameService: GameService;
@@ -119,9 +112,8 @@ export class Game {
   }
 
   removePlayer(playerId: string) {
-    const newPlayers = this.playerManager.removePlayer(playerId);
     if (playerId === this.turnManager.getCurrentPlayerId()) {
-      this.turnManager.endTurn(newPlayers);
+      this.turnManager.endTurn();
     }
   }
 
@@ -133,11 +125,23 @@ export class Game {
     if (this.actionManager.getNopeTimeout()) {
       throw new Error("Nope timer is active");
     }
-    return this.deckManager.drawCard();
-  }
 
-  async nextTurn() {
-    this.turnManager.endTurn(this.playerManager.getPlayers());
+    const currentPlayer = this.getCurrentPlayer();
+    if (!currentPlayer) {
+      throw new Error("No current player");
+    }
+
+    if (!this.turnManager.canDrawCard()) {
+      throw new Error("You cannot draw a card at this time");
+    }
+
+    const card = this.deckManager.drawCard();
+    this.turnManager.markCardDrawn();
+
+    // Handle the turn after drawing a card
+    this.turnManager.handleCardDrawn();
+
+    return card;
   }
 
   isFull() {
@@ -178,7 +182,7 @@ export class Game {
   disconnectPlayer(playerId: string) {
     this.playerManager.disconnectPlayer(playerId);
     if (playerId === this.turnManager.getCurrentPlayerId()) {
-      this.turnManager.endTurn(this.playerManager.getPlayers());
+      this.turnManager.endTurn();
     }
   }
 

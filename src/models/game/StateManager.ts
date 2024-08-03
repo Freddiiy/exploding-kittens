@@ -43,16 +43,16 @@ export class StateManager {
   restoreState(game: Game) {
     if (this.stateStack.length === 0) {
       console.warn("Attempted to restore state with empty stack");
-      throw new Error("No state to restore");
+      return;
     }
 
-    console.log(
-      "State restored. Remaining stack size:",
-      this.stateStack.length,
-    );
-    const state = this.stateStack.pop()!;
-    game.getDeckManger().setState(state.deckManagerState);
-    game.getTurnManger().setState(state.turnManagerState);
+    const state = this.stateStack.pop();
+    console.log("State saved. Stack size:", this.stateStack.length);
+
+    if (state) {
+      game.getDeckManger().setState(state.deckManagerState);
+      game.getTurnManger().setState(state.turnManagerState);
+    }
   }
 }
 
