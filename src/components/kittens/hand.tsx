@@ -8,7 +8,7 @@ import {
   useDndIsReallyActiveId,
 } from "./card";
 import { useUser } from "../user-context";
-import { useGiveCard } from "../game-provider";
+import { useGiveCard } from "../give-cards-dialog";
 
 interface HandProps {
   cards: BaseCardJSON[];
@@ -98,7 +98,7 @@ export function Hand(props: HandProps) {
       {!isGiveCardOpen && (
         <LayoutGroup>
           <AnimatePresence key={"preview-card-" + hoveredCardId}>
-            {hoveredCardId && !isDragActive && (
+            {hoveredCardId && hoveredCard && !isDragActive && (
               <motion.div
                 key={hoveredCard.cardId}
                 initial={{

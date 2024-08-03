@@ -86,6 +86,11 @@ export default class DeckManger {
     this.discardPile.push(card);
   }
 
+  viewTopCards(n: number) {
+    const deckCopy = [...this.getDeck()];
+    return deckCopy.slice(0, n);
+  }
+
   private createCardFromJSON(cardData: BaseCardJSON) {
     const createdCard = CardFactory.createCard(cardData.type);
     createdCard.setId(cardData.cardId);
@@ -102,9 +107,12 @@ export default class DeckManger {
 
   setState(state: DeckManagerState) {
     this.deck = state.deck.map((cardData) => this.createCardFromJSON(cardData));
+
+    /* 
     this.discardPile = state.discardPile.map((cardData) =>
-      this.createCardFromJSON(cardData),
+    this.createCardFromJSON(cardData),
     );
+    */
   }
 }
 

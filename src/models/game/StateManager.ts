@@ -6,8 +6,8 @@ import { type TurnManagerState } from "./TurnManager";
 export class StateManager {
   private stateStack: GameState[] = [];
 
-  captureState(game: Game): GameState {
-    return {
+  captureState(game: Game) {
+    const state: GameState = {
       playerStates: new Map(
         game
           .getPlayerManager()
@@ -22,6 +22,8 @@ export class StateManager {
       turnManagerState: game.getTurnManger().getState(),
       deckManagerState: game.getDeckManger().getState(),
     };
+
+    return state;
   }
 
   pushState(state: GameState) {
@@ -35,17 +37,22 @@ export class StateManager {
   saveState(game: Game) {
     const currentState = this.captureState(game);
     this.pushState(currentState);
+    console.log("State saved. Stack size:", this.stateStack.length);
   }
 
-  restoreState(game: Game, state: GameState) {
-    state.playerStates.forEach((playerState, playerId) => {
-      const player = game.getPlayerManager().getPlayerById(playerId);
-      if (player) {
-        player.setHand(playerState.hand);
-      }
-    });
-    game.getTurnManger().setState(state.turnManagerState);
+  restoreState(game: Game) {
+    if (this.stateStack.length === 0) {
+      console.warn("Attempted to restore state with empty stack");
+      throw new Error("No state to restore");
+    }
+
+    console.log(
+      "State restored. Remaining stack size:",
+      this.stateStack.length,
+    );
+    const state = this.stateStack.pop()!;
     game.getDeckManger().setState(state.deckManagerState);
+    game.getTurnManger().setState(state.turnManagerState);
   }
 }
 

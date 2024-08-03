@@ -4,6 +4,7 @@ import ExplodingKitten from "./ExplodingKitten";
 import Attack from "./original/Attack";
 import Favor from "./original/Favor";
 import Nope from "./original/Nope";
+import SeeTheFuture from "./original/SeeTheFuture";
 import Shuffle from "./original/Shuffle";
 import Skip from "./original/Skip";
 import TacoCat from "./original/TacoCat";
@@ -25,6 +26,8 @@ export class CardFactory {
         return new Skip();
       case CardType.FAVOR:
         return new Favor();
+      case CardType.SEE_THE_FUTURE:
+        return new SeeTheFuture();
       case CardType.TACO_CAT:
         return new TacoCat();
       default:

@@ -15,9 +15,11 @@ import { H1 } from "@/components/ui/typography";
 import { useUser } from "@/components/user-context";
 import { socket } from "@/trpc/socket";
 import { GAME_ACTIONS } from "@/services/GameService";
+import { useState } from "react";
 
 export default function Page() {
   const { user, setUser } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
@@ -34,6 +36,7 @@ export default function Page() {
   });
 
   const onSubmit: SubmitHandler<CreateGameType> = async (data) => {
+    setIsLoading(true);
     setUser(data.player);
     socket.emit(
       GAME_ACTIONS.CREATE,
@@ -52,11 +55,7 @@ export default function Page() {
           <div className="flex flex-col gap-4">
             <PlayerEditor />
             <GameSettings />
-            <Button
-              size={"lg"}
-              className="w-full text-2xl"
-              isLoading={form.formState.isSubmitting}
-            >
+            <Button size={"lg"} className="w-full" isLoading={isLoading}>
               Create game
             </Button>
           </div>

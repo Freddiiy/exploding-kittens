@@ -70,6 +70,7 @@ export default class GameService {
 
           game.getDeckManger().addToDiscardPile(card);
           this.sendGameState(game.getId());
+          this.io.to(gameId).emit(GAME_ACTIONS.PLAY_CARD);
         } catch (error) {
           const err = error as Error;
           console.error("Error in playCard", err);
@@ -95,7 +96,7 @@ export default class GameService {
             throw new Error("it's not your turn.");
           }
 
-          const card = game.getDeckManger().drawCard();
+          const card = await game.drawCard();
 
           if (!card) {
             throw new Error("No more cards in the deck");

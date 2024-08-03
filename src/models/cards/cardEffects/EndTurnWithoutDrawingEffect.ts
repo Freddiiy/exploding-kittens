@@ -3,7 +3,7 @@ import { type Player } from "@/models/Player";
 import { type CardEffect } from "./CardEffect";
 
 export class EndTurnWithoutDrawingEffect implements CardEffect {
-  apply(game: Game, player: Player): void {
+  apply(game: Game): void {
     game.getTurnManger().endTurn(game.getPlayerManager().getPlayers());
   }
   log(player: Player) {

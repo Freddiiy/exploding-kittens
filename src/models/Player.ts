@@ -67,6 +67,10 @@ export class Player {
     return this.handOfCards.find((card) => card.getId() === cardId);
   }
 
+  hasCard(cardId: string) {
+    return this.getHand().some((card) => card.getId() === cardId);
+  }
+
   getLastPlayedCard() {
     return this.lastPlayedCard;
   }

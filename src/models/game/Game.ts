@@ -3,11 +3,12 @@ import { type Player } from "../Player";
 import { generateRandomId } from "@/lib/generateRandomId";
 import TurnManager from "./TurnManager";
 import DeckManger from "./DeckManager";
-import PlayerManager, { GAME_REQUESTS } from "./PlayerManager";
+import PlayerManager from "./PlayerManager";
 import type BaseCard from "../cards/_BaseCard";
 import type GameService from "@/services/GameService";
-import { CardType } from "../cards/_CardType";
 import { StateManager } from "./StateManager";
+import { ActionManager } from "./ActionManager";
+import { RequestManager } from "./RequestManager";
 
 export interface GameSettings {
   publicGame: boolean;
@@ -35,15 +36,13 @@ export class Game {
   private name: string;
   private expansions: Expansion[] = [];
 
-  // Actions for nope
-  private currentAction: CurrentAction | null = null;
-  private nopeTimeout: NodeJS.Timeout | null = null;
-
   // Managers
   private playerManager: PlayerManager;
   private deckManager: DeckManger;
   private turnManager: TurnManager;
   private stateManager: StateManager;
+  private actionManager: ActionManager;
+  private requestManager: RequestManager;
 
   constructor(
     gameSettings: GameSettings,
@@ -58,9 +57,18 @@ export class Game {
     this.deckManager = new DeckManger();
     this.turnManager = new TurnManager();
     this.stateManager = new StateManager();
+    this.requestManager = new RequestManager(this);
 
     this.id = generateRandomId(8);
     this.createdAt = new Date();
+
+    // Make sure this is the latest so everything is initialized
+    this.actionManager = new ActionManager(
+      this,
+      this.gameService,
+      this.playerManager,
+      this.stateManager,
+    );
   }
 
   startGame() {
@@ -118,161 +126,14 @@ export class Game {
   }
 
   async playCard(player: Player, card: BaseCard) {
-    if (card.getType() === CardType.NOPE) {
-      this.handleNopeCard(player, card);
-    } else {
-      await this.initiateAction(player, card);
+    await this.actionManager.playCard(player, card);
+  }
+
+  async drawCard() {
+    if (this.actionManager.getNopeTimeout()) {
+      throw new Error("Nope timer is active");
     }
-  }
-
-  private async initiateAction(player: Player, card: BaseCard) {
-    if (!this.isPlayersTurn(player)) {
-      throw new Error("It's not your turn");
-    }
-
-    this.currentAction = {
-      player: player,
-      card: card,
-      nopeCount: 0,
-      originalPlayer: player,
-    };
-
-    this.stateManager.saveState(this);
-
-    this.broadcastActionInitiated();
-    this.startNopeTimer();
-    player.removeCardFromHand(card.getId());
-    await card.play(this, this.currentAction.originalPlayer);
-  }
-
-  private handleNopeCard(player: Player, card: BaseCard) {
-    // Nope played when no action is in progress
-    if (!this.currentAction) {
-      return;
-    }
-
-    this.cancelCurrentDialogs();
-    if (this.currentAction.nopeCount % 2 !== 0) {
-    }
-
-    this.currentAction.nopeCount++;
-    this.currentAction.player = this.currentAction.originalPlayer;
-
-    console.log("NOPE COUNT: ", this.currentAction.nopeCount);
-    this.broadcastNopePlayedStatus();
-
-    if (this.nopeTimeout) {
-      clearTimeout(this.nopeTimeout);
-    }
-    this.startNopeTimer();
-
-    this.currentAction.card.play(this, this.currentAction.originalPlayer);
-    player.removeCardFromHand(card.getId());
-  }
-
-  private startNopeTimer() {
-    this.nopeTimeout = setTimeout(() => {
-      this.resolveAction();
-    }, 5000); // 5 seconds window for Nope cards
-  }
-
-  private resolveAction() {
-    if (!this.currentAction) return;
-
-    if (this.currentAction.nopeCount % 2 === 0) {
-      // Action proceeds
-      this.stateManager.popState();
-    } else {
-      // Action is noped
-      this.broadcastActionNoped();
-    }
-
-    this.currentAction = null;
-  }
-
-  private broadcastActionInitiated() {
-    // Emit event to all players about the initiated action
-    this.playerManager.getPlayers().forEach((player) => {
-      const playerSocketId = player.getSocketId();
-      if (!playerSocketId) {
-        throw new Error("No socket ID found on " + player.getUsername());
-      }
-
-      const playerSocket = this.gameService
-        .getIO()
-        .sockets.sockets.get(playerSocketId);
-
-      if (!playerSocket) {
-        throw new Error("No socket found on " + player.getUsername());
-      }
-
-      playerSocket.emit("actionInitiated", {
-        playerName: this.currentAction?.player.getUsername(),
-        cardType: this.currentAction?.card.getType(),
-      });
-    });
-  }
-
-  private broadcastNopePlayedStatus() {
-    // Emit event to all players about the current Nope status
-    this.playerManager.getPlayers().forEach((player) => {
-      const playerSocketId = player.getSocketId();
-      if (!playerSocketId) {
-        throw new Error("No socket ID found on " + player.getUsername());
-      }
-
-      const playerSocket = this.gameService
-        .getIO()
-        .sockets.sockets.get(playerSocketId);
-
-      if (!playerSocket) {
-        throw new Error("No socket found on " + player.getUsername());
-      }
-
-      playerSocket.emit("nopeStatusUpdate", {
-        nopeCount: this.currentAction?.nopeCount,
-        isNoped: this.currentAction!.nopeCount % 2 !== 0,
-      });
-    });
-  }
-
-  private broadcastActionNoped() {
-    // Emit event to all players that the action was ultimately noped
-    this.playerManager.getPlayers().forEach((player) => {
-      const playerSocketId = player.getSocketId();
-      if (!playerSocketId) {
-        throw new Error("No socket ID found on " + player.getUsername());
-      }
-
-      const playerSocket = this.gameService
-        .getIO()
-        .sockets.sockets.get(playerSocketId);
-
-      if (!playerSocket) {
-        throw new Error("No socket found on " + player.getUsername());
-      }
-
-      playerSocket.emit("actionNoped", {
-        playerName: this.currentAction?.player.getUsername(),
-        cardType: this.currentAction?.card.getType(),
-      });
-    });
-  }
-
-  private cancelCurrentDialogs() {
-    // Emit an event to all players to close their dialogs
-    this.playerManager.getPlayers().forEach((player) => {
-      const playerSocketId = player.getSocketId();
-      if (!playerSocketId) {
-        throw new Error("Player socket id not found");
-      }
-      const playerSocket = this.gameService
-        .getIO()
-        .sockets.sockets.get(playerSocketId);
-      if (playerSocket) {
-        playerSocket.emit(GAME_REQUESTS.CANCEL_DIALOG);
-      }
-    });
+    return this.deckManager.drawCard();
   }
 
   async nextTurn() {
@@ -340,11 +201,19 @@ export class Game {
     return this.turnManager;
   }
 
+  getRequestManager() {
+    return this.requestManager;
+  }
+
   sendGameState() {
     this.gameService.sendGameState(this.id);
   }
 
   getCreatedAt() {
     return this.createdAt;
+  }
+
+  getGameService() {
+    return this.gameService;
   }
 }

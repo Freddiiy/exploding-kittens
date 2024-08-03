@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { Hand } from "./kittens/hand";
 import { HandContainer } from "./hand-container";
-import { KittenCardCard } from "./kittens/card";
+import { KittenCard, KittenCardCard } from "./kittens/card";
 import { LayoutGroup, motion } from "framer-motion";
 import {
   type GiveCardResponse,
@@ -31,25 +31,24 @@ import {
 } from "@/models/game/RequestManager";
 import { socket } from "@/trpc/socket";
 import { useGameId, useCancelDialog } from "./game-provider";
+import { useNopeTimer } from "./kittens/auto-nope";
 
-interface GiveCardDialogProps {
+interface ViewDeckDialogProps {
   open: boolean;
-  availableCards: BaseCardJSON[];
-  onSelect: (selectedCardId: string) => void;
+  cards: BaseCardJSON[];
+  onConfirm?: () => void;
   onCancel?: () => void;
 }
 
-export function GiveCardDialog({
+export function ViewDeckDialog({
   open,
-  availableCards: cards,
-  onSelect,
+  cards,
+  onConfirm,
   onCancel,
-}: GiveCardDialogProps) {
+}: ViewDeckDialogProps) {
   const [show, setShow] = useState(true);
-  const [selectedCardId, setSelectedCardId] = useState<string>("");
-  function handleSelect(selectedCardId: string) {
-    onSelect(selectedCardId);
-    setSelectedCardId("");
+  function handleClick() {
+    onConfirm?.();
   }
 
   return (
@@ -58,33 +57,21 @@ export function GiveCardDialog({
         <TransparentAlertDialogContent>
           <TransparentAlertDialogHeader>
             <TransparentAlertDialogTitle>
-              Choose a card to give
+              View top {cards.length} {cards.length > 1 ? "cards" : "card"} of
+              the deck
             </TransparentAlertDialogTitle>
           </TransparentAlertDialogHeader>
           <div className="space-y-4 py-12">
-            <div className="flex h-card-height items-center justify-center gap-4">
-              <HandContainer
-                items={cards}
-                render={(item) => (
-                  <button
-                    className={cn("relative h-full w-full")}
-                    onClick={() => setSelectedCardId(item.cardId)}
-                  >
-                    <KittenCardCard card={item} />
-                    <div
-                      className={cn(
-                        "absolute inset-0 rounded-lg opacity-0 transition-all duration-150",
-                        !selectedCardId && "opacity-0",
-                        selectedCardId === item.cardId &&
-                          "opacity-100 ring-4 ring-blue-600",
-                        selectedCardId &&
-                          selectedCardId !== item.cardId &&
-                          "bg-black/40 opacity-100",
-                      )}
-                    />
-                  </button>
-                )}
-              />
+            <div className="flex h-card-height flex-wrap items-center justify-center gap-12">
+              {cards.map((card) => (
+                <motion.div
+                  key={card.cardId}
+                  whileHover={{ scale: 1.5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <KittenCard card={card} />
+                </motion.div>
+              ))}
             </div>
           </div>
           <TransparentAlertDialogFooter>
@@ -92,10 +79,9 @@ export function GiveCardDialog({
               type="button"
               size={"lg"}
               className="mx-auto w-full max-w-2xl"
-              onClick={() => handleSelect(selectedCardId)}
-              disabled={!selectedCardId}
+              onClick={() => handleClick()}
             >
-              <H3>Confirm</H3>
+              <H3>Return cards</H3>
             </Button>
           </TransparentAlertDialogFooter>
           {open && show && (
@@ -129,73 +115,97 @@ export function GiveCardDialog({
     </LayoutGroup>
   );
 }
-interface GiveCardContextProps {
+interface ViewDeckContextProps {
   isDialogOpen: boolean;
-  availableCards: BaseCardJSON[];
-  handleCardSelect(cardId: string): void;
+  cards: BaseCardJSON[];
+  handleConfirm(): void;
   handleCancel(): void;
 }
-const GiveCardContext = createContext<GiveCardContextProps | null>(null);
+const ViewDeckContext = createContext<ViewDeckContextProps | null>(null);
 interface GiveCardProviderProps {
   children: ReactNode;
 }
-export function GiveCardProvider({ children }: GiveCardProviderProps) {
+export function ViewDeckProvider({ children }: GiveCardProviderProps) {
+  const { isTimerCompleted } = useNopeTimer();
   const gameId = useGameId();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [availableCards, setAvailableCards] = useState<BaseCardJSON[]>([]);
+  const [isNoped, setIsNoped] = useState(false);
+  const [cards, setCards] = useState<BaseCardJSON[]>([]);
+
+  useEffect(() => {
+    if (!isNoped && isTimerCompleted && cards.length >= 1) {
+      setIsDialogOpen(true);
+    }
+  }, [cards, isNoped, isTimerCompleted]);
+
+  /* 
+
+  TODO: See The Future thoughts...
+  I don't think this should be a cancelable action.
+  Maybe it should only be viewable after the nope timer is done?
+  Sounds good, but lets wait for feedback.
+  */
 
   const onCancelChange = useCancelDialog();
-  onCancelChange((val) => {
+  onCancelChange(() => {
+    setIsNoped(true);
     setIsDialogOpen(false);
   });
 
-  function handleCardSelect(cardId: string) {
-    const response: GiveCardResponse = {
-      cardId,
-    };
-    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, response);
+  function handleConfirm() {
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE);
+
+    setIsNoped(false);
     setIsDialogOpen(false);
+    setCards([]);
   }
 
   function handleCancel() {
+    setIsNoped(false);
     setIsDialogOpen(false);
     socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, {
       error: "Card selection cancelled",
     });
   }
 
-  function onCardSelection(cards: BaseCardJSON[]) {
-    setAvailableCards(cards);
-    setIsDialogOpen(true);
+  async function onViewCards(cards: BaseCardJSON[]) {
+    setCards(cards);
   }
 
   useEffect(() => {
     socket.on(
-      GAME_REQUESTS.GIVE_CARD,
-      (data: { availableCards: BaseCardJSON[] }) => {
-        onCardSelection(data.availableCards);
+      GAME_REQUESTS.VIEW_DECK_CARDS,
+      async (data: { cards: BaseCardJSON[] }) => {
+        setIsNoped(false);
+        setIsDialogOpen(false);
+        await onViewCards(data.cards);
       },
     );
 
     return () => {
-      socket.off(GAME_REQUESTS.GIVE_CARD);
+      socket.off(GAME_REQUESTS.VIEW_DECK_CARDS);
     };
   }, [gameId]);
 
   return (
-    <GiveCardContext.Provider
-      value={{ isDialogOpen, availableCards, handleCardSelect, handleCancel }}
+    <ViewDeckContext.Provider
+      value={{
+        isDialogOpen,
+        cards,
+        handleConfirm,
+        handleCancel,
+      }}
     >
       {children}
-    </GiveCardContext.Provider>
+    </ViewDeckContext.Provider>
   );
 }
 
-export function useGiveCard() {
-  const giveCardCtx = useContext(GiveCardContext);
-  if (!giveCardCtx) {
-    throw new Error("useGiveCard can only be used inside a GiveCard provider");
+export function useViewDeck() {
+  const viewDeckCtx = useContext(ViewDeckContext);
+  if (!viewDeckCtx) {
+    throw new Error("useViewCard can only be used inside a ViewDeck provider");
   }
 
-  return giveCardCtx;
+  return viewDeckCtx;
 }

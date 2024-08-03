@@ -4,7 +4,7 @@ export const OriginalCardsEnum = {
   ATTACK: "Attack",
   FAVOR: "Favor",
   NOPE: "Nope",
-  SEE_THE_FUTURE_3X: "See The Future 3x",
+  SEE_THE_FUTURE: "See The Future",
   SHUFFLE: "Shuffle",
   SKIP: "Skip",
   BEARD_CAT: "Beard Cat",

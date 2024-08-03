@@ -4,15 +4,15 @@ import { type Player } from "@/models/Player";
 
 export class FavorEffect implements CardEffect {
   async apply(game: Game, player: Player) {
-    const playerManager = game.getPlayerManager();
+    const requestManager = game.getRequestManager();
 
-    const targetPlayer = await playerManager.requestChoosePlayer(player);
+    const targetPlayer = await requestManager.requestChoosePlayer(player);
 
     if (!targetPlayer) {
       throw new Error("Could not find targeted player");
     }
 
-    await playerManager.requestGiveCardToPlayer(targetPlayer, player);
+    await requestManager.requestGiveCardToPlayer(targetPlayer, player);
     game.sendGameState();
   }
 
