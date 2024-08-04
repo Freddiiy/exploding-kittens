@@ -58,9 +58,11 @@ export function SelectCardDialog({
 
   function handleSelect(cardId: string) {
     if (selectedCardId.includes(cardId)) {
-      setSelectedCardId((prev) => prev.filter((cardId) => cardId !== cardId));
+      setSelectedCardId((prev) => prev.filter((_cardId) => _cardId !== cardId));
     } else {
-      setSelectedCardId((prev) => prev.concat(cardId));
+      if (selectedCardId.length < 2) {
+        setSelectedCardId((prev) => prev.concat(cardId));
+      }
     }
   }
 
@@ -82,14 +84,14 @@ export function SelectCardDialog({
             </TransparentAlertDialogTitle>
           </TransparentAlertDialogHeader>
           <div className="space-y-4 py-12">
-            <div className="flex h-card-height flex-wrap items-center justify-center gap-12">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               {cards.map((card) => (
                 <motion.button
                   key={card.cardId}
-                  whileHover={{ scale: 1.3 }}
+                  whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.2 }}
                   onClick={() => handleSelect(card.cardId)}
-                  className="relative h-full w-full"
+                  className="relative h-card-height w-card-width"
                 >
                   <KittenCardCard card={card} />
                   <div
@@ -98,9 +100,6 @@ export function SelectCardDialog({
                       selectedCardId.length === 0 && "opacity-0",
                       selectedCardId.includes(card.cardId) &&
                         "opacity-100 ring-4 ring-blue-600",
-                      selectedCardId &&
-                        !selectedCardId.includes(card.cardId) &&
-                        "bg-black/40 opacity-100",
                     )}
                   />
                 </motion.button>

@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { NopeTimer, useNopeTimer } from "./auto-nope";
 import { SelectCardDialog } from "../select-card-dialog";
-import { Card } from "../ui/card";
+import { CardType } from "@/models/cards/_CardType";
 
 export function PlayArea() {
   const { gameState, playerState, lastPlayedCard } = useGame();
@@ -26,17 +26,18 @@ export function PlayArea() {
   });
 
   const [parent, setParent] = useState<UniqueIdentifier | null>(null);
+  const [playedCardId, setPlayedCardId] = useState<string | null>(null);
   const [isSelectCardsDialogOpen, setSelectCardsDialogOpen] = useState(false);
-  function getAvailableCards() {
+  function getAvailableCards(playedCardId: string) {
     return (
       playerState?.playerHandOfCards
-        .filter((x) => parent?.toString() === x.cardId)
         .filter(
           (card) =>
             playerState.playerHandOfCards.find(
-              (card) => card.cardId === parent?.toString(),
+              (card) => card.cardId === playedCardId,
             )?.type === card.type,
-        ) ?? []
+        )
+        .filter((x) => playedCardId !== x.cardId) ?? []
     );
   }
 
@@ -50,11 +51,22 @@ export function PlayArea() {
 
         if (card && gameState?.id) {
           setParent(event.over ? event.over.id : null);
+          setPlayedCardId(cardId);
 
-          if (card.isCatCard) {
+          if (
+            card.isCatCard &&
+            playerState?.playerHandOfCards
+              .filter((card) => card.cardId !== cardId)
+              .some((cards) => cards.type === card.type) &&
+            playerState?.isPlayersTurn
+          ) {
             setSelectCardsDialogOpen(true);
-          } else {
+          } else if (
+            (playerState?.isPlayersTurn || card.type === CardType.NOPE) &&
+            !card.isCatCard
+          ) {
             playCards(gameState.id, user.userId, [cardId]);
+            setPlayedCardId(null);
           }
         }
       }
@@ -155,13 +167,19 @@ export function PlayArea() {
       <SelectCardDialog
         open={isSelectCardsDialogOpen}
         onOpenChange={setSelectCardsDialogOpen}
-        cards={getAvailableCards()}
+        cards={getAvailableCards(playedCardId ?? "")}
         onConfirm={(cardIds) => {
           const gameId = gameState?.id;
-          const parentCardId = parent?.toString();
+          const parentCardId = playedCardId;
           if (gameId && parentCardId) {
             playCards(gameId, user.userId, [parentCardId, ...(cardIds ?? [])]);
+            setPlayedCardId(null);
+            setSelectCardsDialogOpen(false);
           }
+        }}
+        onCancel={() => {
+          setPlayedCardId(null);
+          setSelectCardsDialogOpen(false);
         }}
       />
     </div>
