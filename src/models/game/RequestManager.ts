@@ -10,10 +10,10 @@ export class RequestManager {
     this.game = game;
   }
 
-  async requestSelectCardFromPlayer(fromPlayer: Player, toPlayer: Player) {
+  async requestPickCardFromPlayer(fromPlayer: Player, toPlayer: Player) {
     const res = await this.sendPlayerRequest(
-      fromPlayer.getId(),
-      GAME_REQUESTS.SELECT_CARD,
+      toPlayer.getId(),
+      GAME_REQUESTS.PICK_CARD,
       { handSize: fromPlayer.getHandSize() },
     );
 
@@ -125,11 +125,11 @@ export class RequestManager {
     return null;
   }
 }
-export interface SelectCardRequest {
+export interface PickCardRequest {
   handSize: number;
 }
 
-export interface SelectCardResponse {
+export interface PickCardResponse {
   selectedCardIndex: number;
 }
 
@@ -154,6 +154,7 @@ export interface ViewDeckCardRequest {
 }
 
 export const GAME_REQUESTS = {
+  PICK_CARD: "pickCard",
   SELECT_CARD: "selectCard",
   GIVE_CARD: "giveCard",
   CHOOSE_PLAYER: "choosePlayer",
@@ -162,9 +163,9 @@ export const GAME_REQUESTS = {
 } as const;
 
 export interface ClientRequestMap {
-  [GAME_REQUESTS.SELECT_CARD]: {
-    request: SelectCardRequest;
-    response: SelectCardResponse;
+  [GAME_REQUESTS.PICK_CARD]: {
+    request: PickCardRequest;
+    response: PickCardResponse;
   };
   [GAME_REQUESTS.GIVE_CARD]: {
     request: GiveCardRequest;

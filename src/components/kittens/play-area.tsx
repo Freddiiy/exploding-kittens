@@ -12,7 +12,7 @@ import { useGame } from "../game-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { NopeTimer, useNopeTimer } from "./auto-nope";
-import { SelectCardDialog } from "../select-card-dialog";
+import { SelectCardDialog } from "../select-combo-dialog";
 import { CardType } from "@/models/cards/_CardType";
 
 export function PlayArea() {

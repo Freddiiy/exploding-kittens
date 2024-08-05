@@ -4,6 +4,7 @@ import { GameProvider } from "@/components/game-provider";
 import { NopeTimerProvider } from "@/components/kittens/auto-nope";
 import { GiveCardProvider } from "@/components/give-cards-dialog";
 import { ViewDeckProvider } from "@/components/view-deck-dialog";
+import { PickCardProvider } from "@/components/pick-card-dialog";
 
 export const metadata: Metadata = {
   title: "Exploding Kittens",
@@ -18,7 +19,9 @@ export default function GameLayout({
     <GameProvider>
       <NopeTimerProvider>
         <GiveCardProvider>
-          <ViewDeckProvider>{children}</ViewDeckProvider>
+          <PickCardProvider>
+            <ViewDeckProvider>{children}</ViewDeckProvider>
+          </PickCardProvider>
         </GiveCardProvider>
       </NopeTimerProvider>
     </GameProvider>

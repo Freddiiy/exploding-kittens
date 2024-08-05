@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useViewDeck, ViewDeckDialog } from "@/components/view-deck-dialog";
 import { Yusei_Magic } from "next/font/google";
 import Loader from "@/components/loader";
+import { PickCardDialog, usePickCard } from "@/components/pick-card-dialog";
 
 export function GamePlay() {
   const { gameState, gameStatus } = useGame();
@@ -29,6 +30,13 @@ export function GamePlay() {
     handleCardSelect: handleGiveCardSelect,
     handleCancel: handleCancelGiveCard,
   } = useGiveCard();
+
+  const {
+    isDialogOpen: isPickCardOpen,
+    handSize: pickCardHandSize,
+    handleCardSelect: handlePickCard,
+    handleCancel: handleCencelPickCard,
+  } = usePickCard();
 
   const {
     isDialogOpen: isViewDeckOpen,
@@ -69,6 +77,12 @@ export function GamePlay() {
           availableCards={availableCards}
           onSelect={handleGiveCardSelect}
           onCancel={handleCancelGiveCard}
+        />
+        <PickCardDialog
+          open={isPickCardOpen}
+          amountOfCards={pickCardHandSize}
+          onSelect={handlePickCard}
+          onCancel={handleCencelPickCard}
         />
         <ViewDeckDialog
           open={isViewDeckOpen}

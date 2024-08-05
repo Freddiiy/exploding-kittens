@@ -29,6 +29,6 @@ export default abstract class CatCard extends BaseCard {
 
     await game
       .getRequestManager()
-      .requestSelectCardFromPlayer(targetPlayer, player);
+      .requestPickCardFromPlayer(targetPlayer, player);
   }
 }

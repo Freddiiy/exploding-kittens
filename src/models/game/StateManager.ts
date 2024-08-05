@@ -37,7 +37,6 @@ export class StateManager {
   saveState(game: Game) {
     const currentState = this.captureState(game);
     this.pushState(currentState);
-    console.log("State saved. Stack size:", this.stateStack.length);
   }
 
   restoreState(game: Game) {
@@ -47,9 +46,16 @@ export class StateManager {
     }
 
     const state = this.stateStack.pop();
-    console.log("State saved. Stack size:", this.stateStack.length);
 
     if (state) {
+      if (game.getDeckManger().getDiscardPile().at(0)?.isCatCard()) {
+        state.playerStates.forEach((playerState, playerId) => {
+          const player = game.getPlayerManager().getPlayerById(playerId);
+          if (player) {
+            player.setHand(playerState.hand);
+          }
+        });
+      }
       game.getDeckManger().setState(state.deckManagerState);
       game.getTurnManger().setState(state.turnManagerState);
     }
