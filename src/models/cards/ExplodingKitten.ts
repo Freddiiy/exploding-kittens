@@ -13,7 +13,7 @@ export default class ExplodingKitten extends BaseCard {
     );
   }
 
-  play(game: Game, player: Player): void {
+  play(game: Game, player: Player) {
     throw new Error("Exploding Kitten cannot be played from hand!");
   }
 }

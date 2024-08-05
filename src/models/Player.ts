@@ -20,6 +20,7 @@ export class Player {
   private avatar: string;
   private handOfCards: BaseCard[] = [];
   private lastPlayedCard: BaseCard | null = null;
+  private eliminated: boolean = false;
 
   constructor(playerOptions: PlayerData) {
     this.userId = playerOptions.userId;
@@ -83,6 +84,14 @@ export class Player {
     this.handOfCards = this.handOfCards.filter(
       (card) => card.getId() !== cardId,
     );
+  }
+
+  isEliminated() {
+    return this.eliminated;
+  }
+
+  setIsEliminated(bool: boolean) {
+    this.eliminated = bool;
   }
 
   toPlayerClient(isCurrentTurn = false) {

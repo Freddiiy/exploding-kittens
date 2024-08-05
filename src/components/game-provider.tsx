@@ -25,8 +25,8 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   type ChoosePlayerRequest,
   GAME_REQUESTS,
-  type PickCardRequest,
-  PickCardResponse,
+  type InsertCardRequest,
+  InsertCardResponse,
 } from "@/models/game/RequestManager";
 
 interface GameContext {

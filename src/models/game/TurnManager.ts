@@ -1,4 +1,5 @@
 import { type Player } from "../Player";
+import { Game } from "./Game";
 
 export default class TurnManager {
   private currentPlayerId: string | null = null;
@@ -7,8 +8,10 @@ export default class TurnManager {
   private playerOrder: string[];
   private attackStack: AttackState[];
   private hasDrawnThisTurn: boolean = false;
+  private game: Game;
 
-  constructor() {
+  constructor(game: Game) {
+    this.game = game;
     this.attackStack = [];
     this.playerOrder = [];
   }
@@ -62,7 +65,17 @@ export default class TurnManager {
   private moveToNextPlayer() {
     const currentIndex = this.playerOrder.indexOf(this.currentPlayerId!);
     const nextIndex = (currentIndex + 1) % this.playerOrder.length;
-    this.currentPlayerId = this.playerOrder.at(nextIndex) ?? null;
+    const newCurrentPlayerId = this.playerOrder.at(nextIndex) ?? null;
+
+    const newCurrentPlayer =
+      this.game.getPlayerManager().getPlayerById(newCurrentPlayerId ?? "") ??
+      null;
+
+    if (newCurrentPlayer?.isEliminated()) {
+      this.moveToNextPlayer();
+    } else {
+      this.currentPlayerId = newCurrentPlayerId;
+    }
   }
 
   addAttack(

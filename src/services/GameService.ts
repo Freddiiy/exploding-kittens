@@ -1,4 +1,5 @@
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
+import { CardType } from "@/models/cards/_CardType";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
@@ -103,15 +104,13 @@ export default class GameService {
             throw new Error("it's not your turn.");
           }
 
-          const card = await game.drawCard();
+          const card = await game.drawCard(currentPlayer);
 
-          if (!card) {
-            throw new Error("No more cards in the deck");
-          }
-
-          currentPlayer.addCardToHand(card);
           await game.getTurnManger().endTurn();
-          callback?.(card.toJSON());
+
+          if (card) {
+            callback?.(card?.toJSON());
+          }
           this.sendGameState(game.getId());
         } catch (error) {
           const err = error as Error;
@@ -315,6 +314,10 @@ export default class GameService {
     }
 
     return game;
+  }
+
+  removeGame(gameId: string) {
+    this.games.delete(gameId);
   }
 
   getIO() {

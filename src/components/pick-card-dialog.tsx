@@ -28,8 +28,8 @@ import { LayoutGroup, motion } from "framer-motion";
 import {
   type GiveCardResponse,
   GAME_REQUESTS,
-  PickCardRequest,
-  PickCardResponse,
+  InsertCardRequest,
+  InsertCardResponse,
 } from "@/models/game/RequestManager";
 import { socket } from "@/trpc/socket";
 import { useGameId, useCancelDialog } from "./game-provider";
@@ -154,7 +154,7 @@ export function PickCardProvider({ children }: PickCardProviderProps) {
   });
 
   function handleCardSelect(cardIdx: number) {
-    const response: PickCardResponse = {
+    const response: InsertCardResponse = {
       selectedCardIndex: cardIdx,
     };
     socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, response);
@@ -174,7 +174,7 @@ export function PickCardProvider({ children }: PickCardProviderProps) {
   }
 
   useEffect(() => {
-    socket.on(GAME_REQUESTS.PICK_CARD, (data: PickCardRequest) => {
+    socket.on(GAME_REQUESTS.PICK_CARD, (data: InsertCardRequest) => {
       onCardSelection(data.handSize);
     });
 

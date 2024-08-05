@@ -20,6 +20,6 @@ export default class Defuse extends ActionCard {
   }
 
   setUpEffects(): void {
-    this.addEffect(new DefuseEffect());
+    //this.addEffect(new DefuseEffect());
   }
 }

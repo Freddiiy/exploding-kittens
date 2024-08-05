@@ -9,6 +9,8 @@ import type GameService from "@/services/GameService";
 import { StateManager } from "./StateManager";
 import { ActionManager } from "./ActionManager";
 import { RequestManager } from "./RequestManager";
+import { CardType } from "../cards/_CardType";
+import ExplodingKitten from "../cards/ExplodingKitten";
 
 export interface GameSettings {
   publicGame: boolean;
@@ -36,6 +38,7 @@ export class Game {
   private stateManager: StateManager;
   private actionManager: ActionManager;
   private requestManager: RequestManager;
+  private winner: Player | null = null;
 
   constructor(
     gameSettings: GameSettings,
@@ -48,7 +51,7 @@ export class Game {
     this.expansions = gameSettings.expansions ?? [];
     this.playerManager = new PlayerManager(maxPlayers, gameService);
     this.deckManager = new DeckManger();
-    this.turnManager = new TurnManager();
+    this.turnManager = new TurnManager(this);
     this.stateManager = new StateManager();
     this.requestManager = new RequestManager(this);
 
@@ -121,14 +124,9 @@ export class Game {
     await this.actionManager.playCard(player, card);
   }
 
-  async drawCard() {
+  async drawCard(player: Player) {
     if (this.actionManager.getNopeTimeout()) {
       throw new Error("Nope timer is active");
-    }
-
-    const currentPlayer = this.getCurrentPlayer();
-    if (!currentPlayer) {
-      throw new Error("No current player");
     }
 
     if (!this.turnManager.canDrawCard()) {
@@ -136,12 +134,92 @@ export class Game {
     }
 
     const card = this.deckManager.drawCard();
-    this.turnManager.markCardDrawn();
 
-    // Handle the turn after drawing a card
+    this.turnManager.markCardDrawn();
     this.turnManager.handleCardDrawn();
 
+    if (card) {
+      player.addCardToHand(card);
+      if (card.getType() === CardType.EXPLODING_KITTEN) {
+        await this.handleExplodingKitten(player);
+      }
+      // Handle the turn after drawing a card
+    }
+
     return card;
+  }
+
+  private async handleExplodingKitten(player: Player) {
+    this.gameService.sendGameState(this.id);
+    const defuseCards = player
+      .getHand()
+      .filter((card) => card.getType() === CardType.DEFUSE);
+
+    if (defuseCards.length > 0) {
+      const selectedDefuseCardId =
+        await this.requestManager.requestCardSelection(player, defuseCards);
+
+      const defuseCard = player.getCardFromHand(selectedDefuseCardId);
+
+      if (defuseCard && defuseCard.getType() === CardType.DEFUSE) {
+        player.removeCardFromHand(defuseCard.getId());
+
+        const explodingKitten = player
+          .getHand()
+          .find((card) => card.getType() === CardType.DEFUSE);
+        if (explodingKitten) {
+          player.removeCardFromHand(explodingKitten.getId());
+        }
+        this.getDeckManger().addToDiscardPile(defuseCard);
+
+        const insertExplodingKittenPosition =
+          await this.getRequestManager().requestInsertPosition(player);
+        this.getDeckManger().insertCard(
+          new ExplodingKitten(),
+          insertExplodingKittenPosition,
+        );
+
+        this.requestManager.broadcastDefuseUsed(player);
+      } else {
+        // Player chose not to use a Defuse card (shouldn't happen in normal gameplay)
+        await this.eliminatePlayer(player);
+      }
+    } else {
+      await this.eliminatePlayer(player);
+    }
+
+    this.turnManager.endTurn();
+  }
+
+  private async eliminatePlayer(player: Player): Promise<void> {
+    player.setIsEliminated(true);
+    player.getHand().map((card) => this.deckManager.addToDiscardPile(card));
+    player.setHand([]);
+
+    //await this.broadcastManager.broadcastPlayerEliminated(player);
+
+    if (
+      this.getPlayerManager()
+        .getPlayers()
+        .filter((x) => x.isEliminated).length === 1
+    ) {
+      await this.endGame(
+        this.getPlayerManager()
+          .getPlayers()
+          .filter((x) => x.isEliminated)
+          .at(0)!,
+      );
+    } else {
+      await this.turnManager.endTurn();
+    }
+  }
+
+  endGame(winner: Player) {
+    this.status = "ended";
+    this.winner = winner;
+    setTimeout(() => {
+      this.gameService.removeGame(this.id);
+    }, 60000); // End game after 60 seconds
   }
 
   isFull() {
