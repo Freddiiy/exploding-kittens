@@ -3,7 +3,6 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { type PlayerClient } from "@/services/GameService";
 import { Game } from "./Game";
 import { Player } from "../Player";
-import { CardType } from "../cards/_CardType";
 
 export class RequestManager {
   broadcastDefuseUsed(player: Player) {

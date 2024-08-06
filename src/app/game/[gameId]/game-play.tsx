@@ -14,6 +14,11 @@ import { useViewDeck, ViewDeckDialog } from "@/components/view-deck-dialog";
 import { Yusei_Magic } from "next/font/google";
 import Loader from "@/components/loader";
 import { PickCardDialog, usePickCard } from "@/components/pick-card-dialog";
+import {
+  InsertPositionDialog,
+  InsertPositionProvider,
+  useInsertPosition,
+} from "@/components/insert-position-dialog";
 
 export function GamePlay() {
   const { gameState, gameStatus } = useGame();
@@ -44,6 +49,12 @@ export function GamePlay() {
     handleConfirm: handleConfirmViewDeck,
     handleCancel: handleCencelViewDeck,
   } = useViewDeck();
+
+  const {
+    isDialogOpen: isInsertOpen,
+    handleConfirm: handleInsertConfirm,
+    handleCancel: handleInsertCancel,
+  } = useInsertPosition();
 
   if (gameStatus === "notFound") {
     return <div>Game not found</div>;
@@ -89,6 +100,11 @@ export function GamePlay() {
           cards={topCards}
           onConfirm={handleConfirmViewDeck}
           onCancel={handleCencelViewDeck}
+        />
+        <InsertPositionDialog
+          open={isInsertOpen}
+          onConfirm={handleInsertConfirm}
+          onCancel={handleInsertCancel}
         />
       </>
     );

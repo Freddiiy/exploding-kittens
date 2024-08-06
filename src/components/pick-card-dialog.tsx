@@ -30,6 +30,8 @@ import {
   GAME_REQUESTS,
   InsertCardRequest,
   InsertCardResponse,
+  PickCardRequest,
+  PickCardResponse,
 } from "@/models/game/RequestManager";
 import { socket } from "@/trpc/socket";
 import { useGameId, useCancelDialog } from "./game-provider";
@@ -69,7 +71,7 @@ export function PickCardDialog({
                 items={Array.from({ length: amountOfCards })}
                 render={(item, i) => (
                   <button
-                    className="relative h-full w-full"
+                    className="relative h-full w-full drop-shadow-lg"
                     onClick={() => setSelectedCardIdx(i)}
                   >
                     <KittenCardBackface />
@@ -154,7 +156,7 @@ export function PickCardProvider({ children }: PickCardProviderProps) {
   });
 
   function handleCardSelect(cardIdx: number) {
-    const response: InsertCardResponse = {
+    const response: PickCardResponse = {
       selectedCardIndex: cardIdx,
     };
     socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, response);
@@ -174,7 +176,7 @@ export function PickCardProvider({ children }: PickCardProviderProps) {
   }
 
   useEffect(() => {
-    socket.on(GAME_REQUESTS.PICK_CARD, (data: InsertCardRequest) => {
+    socket.on(GAME_REQUESTS.PICK_CARD, (data: PickCardRequest) => {
       onCardSelection(data.handSize);
     });
 

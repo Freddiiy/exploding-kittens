@@ -188,7 +188,7 @@ export class Game {
       await this.eliminatePlayer(player);
     }
 
-    this.turnManager.endTurn();
+    this.gameService.sendGameState(this.id);
   }
 
   private async eliminatePlayer(player: Player): Promise<void> {

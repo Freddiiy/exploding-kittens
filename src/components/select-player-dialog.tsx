@@ -36,8 +36,6 @@ export function PlayerSelectionDialog({
     setSelectedPlayerId("");
   }
 
-  console.log("IS PLAYER SELECT OPEN: ", open);
-
   return (
     <AlertDialog
       open={open && show}

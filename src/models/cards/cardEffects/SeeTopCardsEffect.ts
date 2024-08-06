@@ -9,6 +9,6 @@ export class SeeTopCardsEffect implements CardEffect {
   }
   apply(game: Game, player: Player) {
     const viewedCards = game.getDeckManger().viewTopCards(this.numberOfCards);
-    game.getRequestManager().requestViewCards(player, player, viewedCards);
+    game.getRequestManager().requestViewCards(player, viewedCards);
   }
 }
