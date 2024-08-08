@@ -3,8 +3,13 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { type PlayerClient } from "@/services/GameService";
 import { Game } from "./Game";
 import { Player } from "../Player";
+import { DialogManager } from "./DialogManager";
 
 export class RequestManager {
+  constructor(game: Game) {
+    this.game = game;
+  }
+
   broadcastDefuseUsed(player: Player) {
     throw new Error("Method not implemented.");
   }
@@ -18,10 +23,6 @@ export class RequestManager {
     return res.cardId;
   }
   private game: Game;
-
-  constructor(game: Game) {
-    this.game = game;
-  }
 
   async requestInsertPosition(player: Player) {
     const pos = await this.sendPlayerRequest(
@@ -119,6 +120,7 @@ export class RequestManager {
   ) {
     return new Promise<ClientRequestMap[T]["response"]>((resolve, reject) => {
       const timeout = setTimeout(() => {
+        this.game.getDialogManager().closeDialog(playerId);
         reject(new Error("Client request timed out"));
       }, 120000); // 120 seconds timeout
 
@@ -204,7 +206,9 @@ export interface InsertCardResponse {
   insertPosition: number;
 }
 
+export type GAME_REQUEST = (typeof GAME_REQUESTS)[keyof typeof GAME_REQUESTS];
 export const GAME_REQUESTS = {
+  OPEN_DIALOG: "openDialog",
   BROADCAST_EXPLODING_KITTEN: "broadcastExplodingKitten",
   SELECT_DEFUSE: "selectDefuse",
   SELECT_CARD: "selectCard",

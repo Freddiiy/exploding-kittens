@@ -3,6 +3,7 @@ import { CardType } from "@/models/cards/_CardType";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
+import { GAME_REQUEST } from "@/models/game/RequestManager";
 import { Player, type PlayerData } from "@/models/Player";
 import { type Server, type Socket } from "socket.io";
 
@@ -272,9 +273,9 @@ export default class GameService {
     });
   }
 
-  sendRequest(
+  async sendRequest(
     playerId: string,
-    requestType: string,
+    requestType: GAME_REQUEST,
     data: any,
     callback: (response: any) => void,
   ) {
@@ -298,6 +299,7 @@ export default class GameService {
     const playerSocket = this.io.sockets.sockets.get(playerSocketId);
     if (playerSocket) {
       playerSocket.emit(requestType, data);
+      game.getDialogManager().openDialog(playerId, requestType, data);
       playerSocket.once(GAME_ACTIONS.CLIENT_RESPONSE, (response) => {
         callback(response);
       });

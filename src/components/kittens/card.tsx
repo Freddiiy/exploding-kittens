@@ -182,7 +182,7 @@ export function KittenCardContent() {
 
 export function KittenCardBackface() {
   return (
-    <div className="flex h-card-height w-card-width flex-col items-center justify-center -space-y-2 overflow-hidden rounded-xl border-2 border-red-900 bg-red-900">
+    <div className="flex h-card-height w-card-width flex-col items-center justify-center -space-y-2 overflow-hidden rounded-xl bg-gradient-to-t from-red-950 to-red-700">
       <h2 className="text-4xl font-bold">
         <span className="text-clip bg-gradient-to-t from-red-800 via-red-500 to-yellow-300 bg-clip-text text-transparent">
           EXPLODING

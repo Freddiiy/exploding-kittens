@@ -121,15 +121,6 @@ export function InsertPositionDialog({
             >
               <H3>Insert card</H3>
             </Button>
-            <Button
-              type="button"
-              variant={"secondary"}
-              size={"lg"}
-              className="mx-auto w-full max-w-2xl"
-              onClick={() => onCancel?.()}
-            >
-              Cancel
-            </Button>
           </TransparentAlertDialogFooter>
         </TransparentAlertDialogContent>
       </TransparentAlertDialog>

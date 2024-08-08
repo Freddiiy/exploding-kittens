@@ -11,6 +11,7 @@ import { ActionManager } from "./ActionManager";
 import { RequestManager } from "./RequestManager";
 import { CardType } from "../cards/_CardType";
 import ExplodingKitten from "../cards/ExplodingKitten";
+import { DialogManager } from "./DialogManager";
 
 export interface GameSettings {
   publicGame: boolean;
@@ -38,6 +39,7 @@ export class Game {
   private stateManager: StateManager;
   private actionManager: ActionManager;
   private requestManager: RequestManager;
+  private dialogManager: DialogManager;
   private winner: Player | null = null;
 
   constructor(
@@ -49,10 +51,11 @@ export class Game {
     this.publicGame = gameSettings.publicGame ?? true;
     this.name = gameSettings.name ?? "A game of Exploding Kittens";
     this.expansions = gameSettings.expansions ?? [];
-    this.playerManager = new PlayerManager(maxPlayers, gameService);
+    this.playerManager = new PlayerManager(maxPlayers, gameService, this);
     this.deckManager = new DeckManger();
     this.turnManager = new TurnManager(this);
     this.stateManager = new StateManager();
+    this.dialogManager = new DialogManager(this);
     this.requestManager = new RequestManager(this);
 
     this.id = generateRandomId(8);
@@ -260,7 +263,7 @@ export class Game {
   disconnectPlayer(playerId: string) {
     this.playerManager.disconnectPlayer(playerId);
     if (playerId === this.turnManager.getCurrentPlayerId()) {
-      this.turnManager.endTurn();
+      //this.turnManager.endTurn();
     }
   }
 
@@ -297,5 +300,9 @@ export class Game {
 
   getGameService() {
     return this.gameService;
+  }
+
+  getDialogManager() {
+    return this.dialogManager;
   }
 }

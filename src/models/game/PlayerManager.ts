@@ -3,17 +3,20 @@ import type BaseCard from "../cards/_BaseCard";
 import { type Player } from "../Player";
 import { type PlayerClient } from "../../services/GameService";
 import type GameService from "../../services/GameService";
+import { Game } from "./Game";
 
 export default class PlayerManager {
   private gameService: GameService;
+  private game: Game;
   private players: Player[];
   private maxPlayers;
   private disconnectedPlayers: Map<string, Player> = new Map();
 
-  constructor(maxPlayers: number = 5, gameService: GameService) {
+  constructor(maxPlayers: number = 5, gameService: GameService, game: Game) {
     this.players = [];
     this.maxPlayers = maxPlayers;
     this.gameService = gameService;
+    this.game = game;
   }
 
   addPlayer(player: Player): boolean {
@@ -59,6 +62,15 @@ export default class PlayerManager {
     if (player) {
       player.setSocketId(newSocketId);
       this.players.push(player);
+      const dialogState = this.game
+        .getDialogManager()
+        .getDialogState(player.getId());
+
+      if (dialogState) {
+        this.game
+          .getDialogManager()
+          .openDialog(playerId, dialogState.requestType, dialogState.data);
+      }
       this.disconnectedPlayers.delete(playerId);
       return player;
     }
