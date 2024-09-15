@@ -1,4 +1,3 @@
-import { api, HydrateClient } from "@/trpc/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

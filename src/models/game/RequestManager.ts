@@ -3,13 +3,14 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { type PlayerClient } from "@/services/GameService";
 import { Game } from "./Game";
 import { Player } from "../Player";
-import { DialogManager } from "./DialogManager";
 
 export class RequestManager {
+  private game: Game;
   constructor(game: Game) {
     this.game = game;
   }
 
+  //TODO: Implement defuse broadcast
   broadcastDefuseUsed(player: Player) {
     throw new Error("Method not implemented.");
   }
@@ -22,7 +23,6 @@ export class RequestManager {
 
     return res.cardId;
   }
-  private game: Game;
 
   async requestInsertPosition(player: Player) {
     const pos = await this.sendPlayerRequest(
@@ -118,6 +118,7 @@ export class RequestManager {
     requestType: T,
     data?: ClientRequestMap[T]["request"],
   ) {
+    this.game.getDialogManager().openDialog(playerId, requestType, data);
     return new Promise<ClientRequestMap[T]["response"]>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.game.getDialogManager().closeDialog(playerId);
@@ -132,6 +133,7 @@ export class RequestManager {
           data,
           (response: ClientRequestMap[T]["response"]) => {
             clearTimeout(timeout);
+            this.game.getDialogManager().closeDialog(playerId);
             resolve(response);
           },
         );

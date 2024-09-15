@@ -1,8 +1,12 @@
 import { type Game } from "./Game";
-import { GAME_REQUESTS, type GAME_REQUEST } from "./RequestManager";
+import {
+  ClientRequestMap,
+  GAME_REQUESTS,
+  type GAME_REQUEST,
+} from "./RequestManager";
 
 export interface DialogState {
-  requestType: GAME_REQUEST;
+  requestType: keyof ClientRequestMap;
   data?: any;
 }
 
@@ -14,7 +18,11 @@ export class DialogManager {
     this.game = game;
   }
 
-  openDialog(playerId: string, requestType: GAME_REQUEST, data?: any) {
+  openDialog(
+    playerId: string,
+    requestType: keyof ClientRequestMap,
+    data?: any,
+  ) {
     if (!this.openDialogs.has(this.game.getId())) {
       this.openDialogs.set(this.game.getId(), new Map());
     }

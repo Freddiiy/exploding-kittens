@@ -14,11 +14,7 @@ export default abstract class CatCard extends BaseCard {
   }
   play(game: Game, player: Player): void {}
 
-  static async handleCatCardCombo(
-    game: Game,
-    player: Player,
-    cards: BaseCard[],
-  ) {
+  static async handleCatCardCombo(game: Game, player: Player) {
     const targetPlayer = await game
       .getRequestManager()
       .requestChoosePlayer(player);

@@ -39,7 +39,7 @@ export function usePlayerSelection() {
 
   useEffect(() => {
     socket.on(
-      GAME_REQUESTS.OPEN_DIALOG,
+      GAME_REQUESTS.CHOOSE_PLAYER,
       (data: { availablePlayers: PlayerClient[] }) => {
         openPlayerSelection(data.availablePlayers);
       },

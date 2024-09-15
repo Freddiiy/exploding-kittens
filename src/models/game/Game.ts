@@ -123,8 +123,8 @@ export class Game {
     }
   }
 
-  async playCard(player: Player, card: BaseCard[]) {
-    await this.actionManager.playCard(player, card);
+  async playCards(player: Player, cards: BaseCard[]) {
+    await this.actionManager.playCards(player, cards);
   }
 
   async drawCard(player: Player) {

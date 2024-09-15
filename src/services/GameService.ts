@@ -3,7 +3,7 @@ import { CardType } from "@/models/cards/_CardType";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
-import { GAME_REQUEST } from "@/models/game/RequestManager";
+import { ClientRequestMap, GAME_REQUEST } from "@/models/game/RequestManager";
 import { Player, type PlayerData } from "@/models/Player";
 import { type Server, type Socket } from "socket.io";
 
@@ -74,7 +74,7 @@ export default class GameService {
             throw new Error("You must play 1 to 3 cards.");
           }
 
-          await game.playCard(currentPlayer, cards);
+          await game.playCards(currentPlayer, cards);
 
           cards.map((card) => game.getDeckManger().addToDiscardPile(card));
 
@@ -275,7 +275,7 @@ export default class GameService {
 
   async sendRequest(
     playerId: string,
-    requestType: GAME_REQUEST,
+    requestType: keyof ClientRequestMap,
     data: any,
     callback: (response: any) => void,
   ) {

@@ -31,7 +31,7 @@ export class ActionManager {
     this.stateManager = stateManager;
   }
 
-  async playCard(player: Player, cards: BaseCard[]) {
+  async playCards(player: Player, cards: BaseCard[]) {
     if (cards.length === 1 && cards.at(0)?.getType() === CardType.NOPE) {
       await this.handleNopeCard(player, cards.at(0)!);
     } else {
@@ -124,11 +124,7 @@ export class ActionManager {
         await action.cards.at(0)?.play(this.game, action.originalPlayer);
       } else {
         // Handle cat card combo
-        await CatCard.handleCatCardCombo(
-          this.game,
-          action.originalPlayer,
-          action.cards,
-        );
+        await CatCard.handleCatCardCombo(this.game, action.originalPlayer);
       }
     } catch (error) {
       const err = error as Error;

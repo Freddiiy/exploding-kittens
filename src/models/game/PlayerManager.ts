@@ -70,6 +70,13 @@ export default class PlayerManager {
         this.game
           .getDialogManager()
           .openDialog(playerId, dialogState.requestType, dialogState.data);
+        this.game
+          .getRequestManager()
+          .sendPlayerRequest(
+            playerId,
+            dialogState.requestType,
+            dialogState.data,
+          );
       }
       this.disconnectedPlayers.delete(playerId);
       return player;
