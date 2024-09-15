@@ -68,9 +68,6 @@ export default class PlayerManager {
 
       if (dialogState) {
         this.game
-          .getDialogManager()
-          .openDialog(playerId, dialogState.requestType, dialogState.data);
-        this.game
           .getRequestManager()
           .sendPlayerRequest(
             playerId,
