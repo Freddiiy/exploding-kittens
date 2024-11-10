@@ -51,29 +51,11 @@ export function KittenCard({
   dragDisabled = false,
   className,
 }: KittenCardFullProps & { dragDisabled?: boolean }) {
-  const isDragActive = useDndIsReallyActiveId(card.cardId);
-
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: card.cardId,
-    disabled: dragDisabled || disabled,
-  });
-
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    opacity: isDragActive ? 0 : 1,
-  };
-
   return (
-    <div ref={setNodeRef} style={{ opacity: isDragActive ? 0 : 1 }}>
-      <motion.div {...attributes} {...listeners} style={style}>
+    <div>
+      <motion.div>
         <KittenCardCard card={card} disabled={disabled} flipped={flipped} />
       </motion.div>
-
-      <KittenCardDragOverlay card={card}>
-        <motion.div style={{ opacity: isDragActive ? 1 : 0 }}>
-          <KittenCardCard card={card} flipped={flipped} />
-        </motion.div>
-      </KittenCardDragOverlay>
     </div>
   );
 }
@@ -84,24 +66,13 @@ export function KittenCardCard({
   flipped = false,
 }: KittenCardFullProps) {
   const controls = useAnimation();
-  const isDragActive = useDndIsReallyActiveId(card.cardId);
-  const { gameState } = useGame();
 
-  useEffect(() => {
-    if (isDragActive) {
-      controls.start({ y: 0, scale: 1 });
-    }
-  }, [isDragActive, controls]);
+  const { gameState } = useGame();
 
   return (
     <motion.div
-      animate={isDragActive ? controls : undefined}
-      layoutId={
-        !isDragActive
-          ? "player-" + gameState?.currentPlayerId + "card-" + card.cardId
-          : undefined
-      }
-      className={cn(isDragActive && "drop-shadow-2xl")}
+      animate={controls}
+      layoutId={"player-" + gameState?.currentPlayerId + "card-" + card.cardId}
     >
       <KittenCardSkeleton card={card} disabled={disabled} flipped={flipped} />
     </motion.div>
@@ -113,7 +84,6 @@ export function KittenCardSkeleton({
   disabled = false,
   flipped = false,
 }: KittenCardFullProps) {
-  const isDragActive = useDndIsReallyActiveId(card.cardId);
   const [isFlipped, setIsFlipped] = useState(flipped);
   const [shouldAnimate, setShouldAnimate] = useState(false);
   useEffect(() => {
@@ -128,10 +98,7 @@ export function KittenCardSkeleton({
       value={{ card: card, disabled, flipped: flipped }}
     >
       <motion.div
-        className={cn(
-          "relative h-card-height w-card-width",
-          isDragActive && "shadow-2xl",
-        )}
+        className={cn("relative h-card-height w-card-width")}
         style={{ transformStyle: "preserve-3d" }}
         initial={{ rotateY: flipped ? 180 : 0 }}
         animate={shouldAnimate && { rotateY: isFlipped ? 180 : 0 }}
@@ -193,37 +160,6 @@ export function KittenCardBackface() {
   );
 }
 
-interface KittenCardDragOverlayProps extends KittenCardFullProps {
-  children: ReactNode;
-}
-function KittenCardDragOverlay({ card, children }: KittenCardDragOverlayProps) {
-  const { active } = useDndContext();
-  const isDragActive = useDndIsReallyActiveId(card.cardId);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (isDragActive) {
-      setIsAnimating(true);
-    } else {
-      const timer = setTimeout(() => {
-        setIsAnimating(false);
-      }, 300); // Adjust this value to match your animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [isDragActive]);
-
-  if (!isDragActive && !isAnimating) {
-    return null;
-  }
-
-  return createPortal(
-    <DragOverlay modifiers={[snapCenterToCursor]}>
-      {active ? children : null}
-    </DragOverlay>,
-    document.body,
-  );
-}
-
 interface KittenCardHeaderProps {
   flipped?: boolean;
 }
@@ -271,10 +207,4 @@ function useKittenCard() {
   }
 
   return kittenCardCtx;
-}
-
-export function useDndIsReallyActiveId(id: string) {
-  const context = useDndContext();
-  const isActive = context.active?.id === id;
-  return isActive;
 }

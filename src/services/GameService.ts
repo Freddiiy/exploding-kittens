@@ -70,6 +70,11 @@ export default class GameService {
             throw new Error("One or more cards not found in player's hand.");
           }
 
+          if (cards.length <= 0) {
+            game.getTurnManger().endTurn();
+            return;
+          }
+
           if (cards.length < 1 || cards.length > 3) {
             throw new Error("You must play 1 to 3 cards.");
           }

@@ -14,18 +14,10 @@ import { useState } from "react";
 import { NopeTimer, useNopeTimer } from "./auto-nope";
 import { SelectCardDialog } from "../select-combo-dialog";
 import { CardType } from "@/models/cards/_CardType";
+import { Button } from "../ui/button";
 
 export function PlayArea() {
   const { gameState, playerState, lastPlayedCard } = useGame();
-  const { setNodeRef: discardRef, isOver: isOverDiscard } = useDroppable({
-    id: "discard-pile",
-  });
-
-  const { setNodeRef: drawRef, isOver: isOverDraw } = useDroppable({
-    id: "draw-pile",
-  });
-
-  const [parent, setParent] = useState<UniqueIdentifier | null>(null);
   const [playedCardId, setPlayedCardId] = useState<string | null>(null);
   const [isSelectCardsDialogOpen, setSelectCardsDialogOpen] = useState(false);
   function getAvailableCards(playedCardId: string) {
@@ -41,43 +33,7 @@ export function PlayArea() {
     );
   }
 
-  useDndMonitor({
-    onDragEnd(event) {
-      const cardId = event.active.id as string;
-      if (event.over && event.over.id === "discard-pile") {
-        const card = playerState?.playerHandOfCards.find(
-          (card) => card.cardId === cardId,
-        );
-
-        if (card && gameState?.id) {
-          setParent(event.over ? event.over.id : null);
-          setPlayedCardId(cardId);
-
-          if (
-            card.isCatCard &&
-            playerState?.playerHandOfCards
-              .filter((card) => card.cardId !== cardId)
-              .some((cards) => cards.type === card.type) &&
-            playerState?.isPlayersTurn
-          ) {
-            setSelectCardsDialogOpen(true);
-          } else if (
-            (playerState?.isPlayersTurn || card.type === CardType.NOPE) &&
-            !card.isCatCard
-          ) {
-            playCards(gameState.id, user.userId, [cardId]);
-            setPlayedCardId(null);
-          }
-        }
-      }
-    },
-  });
-
   const { user } = useUser();
-  const dndCard = gameState?.discardPile.find(
-    (card) => card.cardId === parent?.toString(),
-  );
-
   const { canBeNoped } = useNopeTimer();
 
   return (
@@ -86,10 +42,8 @@ export function PlayArea() {
         <motion.div>
           <div className="flex transform-none items-start justify-center gap-8">
             <div
-              ref={discardRef}
               className={cn(
                 "group relative flex h-card-height w-card-width items-center justify-center rounded-lg outline-dashed outline-2 outline-offset-2 outline-primary transition-all duration-300",
-                isOverDiscard && "is-over outline-green-600",
               )}
             >
               {gameState?.discardPile.map((card) => (
@@ -103,13 +57,9 @@ export function PlayArea() {
               ))}
               {lastPlayedCard && <KittenCardCard card={lastPlayedCard} />}
               <motion.div
-                layoutId={parent?.toString()}
-                key={parent?.toString()}
                 className="pointer-events-none absolute inset-0"
                 layout={false}
-              >
-                {dndCard ? <KittenCard card={dndCard} /> : null}
-              </motion.div>
+              ></motion.div>
               <H2 className="text-4xl group-[.is-over]:text-green-600">
                 Discard pile
               </H2>
@@ -118,7 +68,6 @@ export function PlayArea() {
             <button
               className={cn(
                 "group relative flex h-card-height w-card-width items-center justify-center rounded-lg outline-dashed outline-2 outline-offset-2 outline-primary transition-all duration-300",
-                isOverDraw && "is-over outline-green-600",
               )}
             >
               <motion.div className="pointer-events-none absolute inset-0">
@@ -150,7 +99,7 @@ export function PlayArea() {
         </motion.div>
         <div className="h-12 w-full">
           <AnimatePresence>
-            {canBeNoped && (
+            {canBeNoped ? (
               <motion.div
                 className="w-full"
                 initial={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
@@ -158,8 +107,31 @@ export function PlayArea() {
                 exit={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                <NopeTimer />
+                {canBeNoped ? (
+                  <NopeTimer />
+                ) : (
+                  <Button
+                    type={"button"}
+                    size={"lg"}
+                    className={"w-full"}
+                    onClick={() => {
+                      if (gameState) {
+                        drawCard(gameState?.id, user.userId);
+                      }
+                    }}
+                  >
+                    DRAW CARD
+                  </Button>
+                )}
               </motion.div>
+            ) : (
+              <motion.div
+                className="w-full"
+                initial={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
+                animate={{ opacity: 1, height: "auto", scale: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
+                transition={{ duration: 0.2 }}
+              ></motion.div>
             )}
           </AnimatePresence>
         </div>

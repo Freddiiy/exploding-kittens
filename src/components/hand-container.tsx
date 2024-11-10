@@ -62,7 +62,7 @@ export function HandContainer<T>(props: HandProps<T>) {
             <motion.div
               className="absolute cursor-pointer"
               key={i}
-              style={{ transformOrigin: "center bottom" }}
+              //style={{ transformOrigin: "center bottom" }}
               animate={animate}
               exit={"hidden"}
               transition={{ duration: isHovered ? 0.1 : 0.3 }}
