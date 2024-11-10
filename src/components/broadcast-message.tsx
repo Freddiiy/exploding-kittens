@@ -21,7 +21,7 @@ export function BroadcastMessage() {
 
     const timeout = setTimeout(() => {
       setMessage(null);
-    }, 3000);
+    }, 4500);
 
     return () => {
       clearTimeout(timeout);
@@ -41,7 +41,7 @@ export function BroadcastMessage() {
           controls.start({
             opacity: 0,
             scale: 1,
-            transition: { duration: 0.5, delay: 1 },
+            transition: { duration: 0.5, delay: 2.5 },
           });
         });
     }

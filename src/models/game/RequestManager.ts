@@ -156,11 +156,13 @@ export class RequestManager {
   ) {
     this.game.getDialogManager().openDialog(playerId, requestType, data);
     return new Promise<ClientRequestMap[T]["response"]>((resolve, reject) => {
+      /* 
       const timeout = setTimeout(() => {
         this.game.getDialogManager().closeDialog(playerId);
         reject(new Error("Client request timed out"));
       }, 120000); // 120 seconds timeout
-
+      
+      */
       this.game
         .getGameService()
         .sendRequest(
@@ -168,7 +170,7 @@ export class RequestManager {
           requestType,
           data,
           (response: ClientRequestMap[T]["response"]) => {
-            clearTimeout(timeout);
+            //clearTimeout(timeout);
             this.game.getDialogManager().closeDialog(playerId);
             resolve(response);
           },
