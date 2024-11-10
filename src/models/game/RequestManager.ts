@@ -1,6 +1,6 @@
 import type BaseCard from "@/models/cards/_BaseCard";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
-import { type PlayerClient } from "@/services/GameService";
+import { GAME_ACTIONS, type PlayerClient } from "@/services/GameService";
 import { Game } from "./Game";
 import { Player } from "../Player";
 import { Inter } from "next/font/google";
@@ -13,6 +13,19 @@ export class RequestManager {
   }
 
   //TODO: Implement defuse broadcast
+
+  broadcastMessage(
+    message: string,
+    toPlayers: Player[] = this.game.getPlayerManager().getPlayers(),
+  ) {
+    const io = this.game.getGameService().getIO();
+
+    toPlayers.forEach((player) => {
+      this.sendPlayerRequest(player.getId(), GAME_REQUESTS.BROADCAST_MESSAGE, {
+        message,
+      });
+    });
+  }
   broadcastDefuseUsed(player: Player) {
     throw new Error("Method not implemented.");
   }
@@ -47,7 +60,7 @@ export class RequestManager {
       case "Fifth":
         return 4;
       case "Bottom":
-        return this.game.getDeckManger().getDeckSize() - 1; // Assuming `deck` is defined as the array representing the deck.
+        return this.game.getDeckManger().getDeckSize() - 1;
       case "Random":
         return Math.floor(
           Math.random() * this.game.getDeckManger().getDeckSize(),
@@ -215,6 +228,10 @@ export interface ViewDeckCardRequest {
   cards: BaseCardJSON[];
 }
 
+export interface BroadcastMessage {
+  message: string;
+}
+
 export interface BroadcastExplodingKittenRequest {
   byPlayer: PlayerClient;
 }
@@ -243,6 +260,7 @@ export const GAME_REQUESTS = {
   CANCEL_DIALOG: "cancelDialogs",
   VIEW_DECK_CARDS: "viewDeckCards",
   INSERT_DEFUSE: "insertDefuse",
+  BROADCAST_MESSAGE: "broadcastMessage",
 } as const;
 
 export interface ClientRequestMap {
@@ -270,6 +288,11 @@ export interface ClientRequestMap {
 
   [GAME_REQUESTS.VIEW_DECK_CARDS]: {
     request: ViewDeckCardRequest;
+    response: void;
+  };
+
+  [GAME_REQUESTS.BROADCAST_MESSAGE]: {
+    request: BroadcastMessage;
     response: void;
   };
 }

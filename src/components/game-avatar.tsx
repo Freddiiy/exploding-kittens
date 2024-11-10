@@ -11,11 +11,13 @@ interface PlayerAvatarProps {
   user: Omit<PlayerData, "userId">;
   size?: "default" | "lg" | "sm" | "xs";
   selected?: boolean;
+  showUsername?: boolean;
 }
 export function PlayerAvatar({
   user,
   size = "default",
   selected = false,
+  showUsername = true,
 }: PlayerAvatarProps) {
   const src =
     explodingKittenCharacters.find((c) => c.name === user.avatar)?.img ?? "";
@@ -32,7 +34,9 @@ export function PlayerAvatar({
           "transition-all duration-150",
         )}
       />
-      <P className="max-w-20 truncate text-nowrap">{user.username}</P>
+      {showUsername && (
+        <P className="max-w-20 truncate text-nowrap">{user.username}</P>
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { useGame } from "../game-provider";
 import { playCard } from "@/lib/actions";
 import { useUser } from "../user-context";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { PlayerAvatar } from "../game-avatar";
 
 interface HandProps {
   cards: BaseCardJSON[];
@@ -199,7 +200,7 @@ export function Hand(props: HandProps) {
           className={cn(
             "p-1 transition-all duration-150",
             game.playerState?.isPlayersTurn &&
-              "ring ring-primary ring-offset-4 ring-offset-background",
+              "ring ring-ring ring-offset-4 ring-offset-background",
           )}
         >
           <CardContent className="p-1">
@@ -232,9 +233,29 @@ export function Hand(props: HandProps) {
                 </Button>
 
                 <div className="flex flex-col gap-1">
-                  <div className="flex justify-center">
-                    <span>
-                      {selectedCards.length} / {props.cards.length}
+                  <div className="relative flex justify-center">
+                    <div className="absolute -top-14">
+                      <PlayerAvatar
+                        user={
+                          game.gameState?.players.find(
+                            (x) => x.id === user.user.userId,
+                          )!
+                        }
+                        size="sm"
+                        selected={
+                          game.gameState?.players.find(
+                            (x) => x.id === user.user.userId,
+                          )?.isCurrentTurn
+                        }
+                        showUsername={false}
+                      />
+                    </div>
+                    <span className="text-sm">
+                      {
+                        game.gameState?.players.find(
+                          (x) => x.id === user.user.userId,
+                        )?.username
+                      }
                     </span>
                   </div>
                   <div className="flex gap-1">

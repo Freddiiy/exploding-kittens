@@ -73,3 +73,7 @@ export function Board() {
     </div>
   );
 }
+
+function LeaveGameButton() {
+  return null;
+}

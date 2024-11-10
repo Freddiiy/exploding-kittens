@@ -19,6 +19,7 @@ import {
   InsertPositionProvider,
   useInsertDefuse as useInsertDefuse,
 } from "@/components/insert-position-dialog";
+import { BroadcastMessage } from "@/components/broadcast-message";
 
 export function GamePlay() {
   const { gameState, gameStatus } = useGame();
@@ -76,6 +77,7 @@ export function GamePlay() {
     return (
       <>
         <YourTurnBroadcast />
+        <BroadcastMessage />
         <Board />
         <PlayerSelectionDialog
           open={isPlayerSelectionOpen}
