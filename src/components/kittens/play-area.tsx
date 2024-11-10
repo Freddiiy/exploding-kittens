@@ -1,19 +1,13 @@
-import {
-  type UniqueIdentifier,
-  useDndMonitor,
-  useDroppable,
-} from "@dnd-kit/core";
 import { useUser } from "../user-context";
 import { cn } from "@/lib/utils";
 import { H2 } from "../ui/typography";
-import { KittenCard, KittenCardBackface, KittenCardCard } from "./card";
+import { KittenCardBackface, KittenCardCard } from "./card";
 import { drawCard, playCard as playCards } from "@/lib/actions";
 import { useGame } from "../game-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { NopeTimer, useNopeTimer } from "./auto-nope";
 import { SelectCardDialog } from "../select-combo-dialog";
-import { CardType } from "@/models/cards/_CardType";
 import { Button } from "../ui/button";
 
 export function PlayArea() {
@@ -99,7 +93,7 @@ export function PlayArea() {
         </motion.div>
         <div className="h-12 w-full">
           <AnimatePresence>
-            {canBeNoped ? (
+            {canBeNoped && (
               <motion.div
                 className="w-full"
                 initial={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
@@ -107,31 +101,28 @@ export function PlayArea() {
                 exit={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                {canBeNoped ? (
-                  <NopeTimer />
-                ) : (
-                  <Button
-                    type={"button"}
-                    size={"lg"}
-                    className={"w-full"}
-                    onClick={() => {
-                      if (gameState) {
-                        drawCard(gameState?.id, user.userId);
-                      }
-                    }}
-                  >
-                    DRAW CARD
-                  </Button>
-                )}
+                <NopeTimer />
               </motion.div>
-            ) : (
+            )}
+            {!canBeNoped && playerState?.isPlayersTurn && (
               <motion.div
                 className="w-full"
                 initial={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
                 animate={{ opacity: 1, height: "auto", scale: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0, scale: 0.85, y: -20 }}
                 transition={{ duration: 0.2 }}
-              ></motion.div>
+              >
+                <Button
+                  type="button"
+                  size={"lg"}
+                  className="w-full"
+                  onClick={() => {
+                    if (gameState?.id) drawCard(gameState?.id, user.userId);
+                  }}
+                >
+                  DRAW CARD
+                </Button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

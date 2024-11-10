@@ -54,7 +54,12 @@ export function KittenCard({
   return (
     <div>
       <motion.div>
-        <KittenCardCard card={card} disabled={disabled} flipped={flipped} />
+        <KittenCardCard
+          className={className}
+          card={card}
+          disabled={disabled}
+          flipped={flipped}
+        />
       </motion.div>
     </div>
   );
@@ -207,4 +212,34 @@ function useKittenCard() {
   }
 
   return kittenCardCtx;
+}
+
+export function canComboWith(card: BaseCardJSON, otherCard: BaseCardJSON) {
+  if (card.cardId === otherCard.cardId) {
+    return true;
+  }
+  // If either card is not a cat card, they can't combo
+  if (!card.isCatCard || !otherCard.isCatCard) {
+    return false;
+  }
+
+  // If either card doesn't have a combo type, they can't combo
+  if (!card.comboType || !otherCard.comboType) {
+    return false;
+  }
+
+  // Cards can combo if they have the same combo type
+  return card.comboType === otherCard.comboType;
+}
+export function canComboWithArray(card: BaseCardJSON, cards: BaseCardJSON[]) {
+  // Base case: if no cards to check, return false
+  if (cards.length === 0) {
+    return false;
+  }
+
+  // Check each card in the array using the original canComboWith function
+  return cards.some((otherCard) =>
+    // Skip checking against itself
+    canComboWith(card, otherCard),
+  );
 }

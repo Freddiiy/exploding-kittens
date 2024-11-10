@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
-import { KittenCard, KittenCardCard, KittenCardSkeleton } from "./card";
+import {
+  canComboWith,
+  canComboWithArray,
+  KittenCard,
+  KittenCardCard,
+  KittenCardSkeleton,
+} from "./card";
 import { useGiveCard } from "../give-cards-dialog";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
@@ -94,10 +100,7 @@ export function Hand(props: HandProps) {
 
           return (
             <motion.div
-              className={cn(
-                "absolute bottom-48 cursor-pointer",
-                isCardSelected(card) && "translate-y-",
-              )}
+              className={cn("absolute bottom-48 cursor-pointer")}
               key={card.cardId}
               layout={false}
               animate={animate}
@@ -112,7 +115,22 @@ export function Hand(props: HandProps) {
                 toggleCardToSelected(card);
               }}
             >
-              <KittenCard card={card} />
+              <div
+                className={cn(
+                  "relative transition-all duration-75",
+                  hoveredCard?.cardId === card.cardId && "opacity-0",
+                )}
+              >
+                <KittenCard card={card} />
+                <div
+                  className={cn(
+                    "absolute inset-0 z-10 rounded-lg bg-black opacity-0 transition-all duration-150",
+                    selectedCards.length > 0 &&
+                      !canComboWithArray(card, selectedCards) &&
+                      "opacity-35",
+                  )}
+                />
+              </div>
             </motion.div>
           );
         })}
@@ -121,8 +139,6 @@ export function Hand(props: HandProps) {
 
         {!isGiveCardOpen && (
           <LayoutGroup>
-            {/*
-             */}
             <AnimatePresence key={"preview-card-" + hoveredCardId}>
               {hoveredCardId && hoveredCard && (
                 <motion.div

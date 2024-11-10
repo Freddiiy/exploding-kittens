@@ -10,6 +10,8 @@ export default abstract class BaseCard {
   protected description: string;
   protected mechanics: string;
   protected _isCatCard: boolean;
+  protected _comboType?: string;
+
   constructor(
     type: CardType,
     name: string,
@@ -48,6 +50,25 @@ export default abstract class BaseCard {
     return this._isCatCard;
   }
 
+  getComboType(): string | undefined {
+    return this._comboType;
+  }
+
+  canComboWith(otherCard: BaseCard): boolean {
+    // If either card is not a cat card, they can't combo
+    if (this.isCatCard() || otherCard.isCatCard()) {
+      return true;
+    }
+
+    // If either card doesn't have a combo type, they can't combo
+    if (!this._comboType || !otherCard.getComboType()) {
+      return false;
+    }
+
+    // Cards can combo if they have the same combo type
+    return this._comboType === otherCard.getComboType();
+  }
+
   abstract play(game: Game, player: Player): void;
 
   toJSON() {
@@ -58,6 +79,7 @@ export default abstract class BaseCard {
       description: this.description,
       mechanics: this.mechanics,
       isCatCard: this.isCatCard(),
+      comboType: this._comboType,
     };
     return cardJSON;
   }
@@ -70,4 +92,5 @@ export type BaseCardJSON = {
   description: string;
   mechanics: string;
   isCatCard: boolean;
+  comboType?: string;
 };
