@@ -243,3 +243,15 @@ export function canComboWithArray(card: BaseCardJSON, cards: BaseCardJSON[]) {
     canComboWith(card, otherCard),
   );
 }
+
+export function canPlayCards(cards: BaseCardJSON[]) {
+  if (cards.length === 0) {
+    return false;
+  }
+
+  if (cards.every((x) => canComboWithArray(x, cards) && x.isCatCard)) {
+    return cards.length > 1 && cards.length <= 3;
+  } else {
+    return cards.length === 1;
+  }
+}

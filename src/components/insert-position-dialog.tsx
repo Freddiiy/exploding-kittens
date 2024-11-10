@@ -22,7 +22,7 @@ import React from "react";
 import { LayoutGroup } from "framer-motion";
 import { GAME_REQUESTS } from "@/models/game/RequestManager";
 import { socket } from "@/trpc/socket";
-import { useGameId, useCancelDialog } from "./game-provider";
+import { useGameId, useCancelDialog, useGame } from "./game-provider";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { KittenCardBackface } from "./kittens/card";
@@ -30,11 +30,11 @@ import { KittenCardBackface } from "./kittens/card";
 interface InsertPositionDialogProps {
   open: boolean;
   onOpenChange?(open: boolean): void;
-  onConfirm?: (postion: (typeof options)[number]) => void;
+  onConfirm?: (postion: (typeof insertOptions)[number]) => void;
   onCancel?: () => void;
 }
 
-const options = [
+export const insertOptions = [
   "Top",
   "Second",
   "Third",
@@ -44,15 +44,16 @@ const options = [
   "Random",
 ] as const;
 
-export function InsertPositionDialog({
+export function InsertDefuseDialog({
   open,
   onOpenChange,
   onConfirm,
   onCancel,
 }: InsertPositionDialogProps) {
   const [selectedPosition, setSelectedPosition] = useState<
-    (typeof options)[number] | null
+    (typeof insertOptions)[number] | null
   >(null);
+  const game = useGame();
 
   function handleConfirm() {
     if (selectedPosition) {
@@ -60,8 +61,8 @@ export function InsertPositionDialog({
     }
   }
 
-  function handleSelect(index: (typeof options)[number]) {
-    setSelectedPosition(index);
+  function handleSelect(insertPosition: (typeof insertOptions)[number]) {
+    setSelectedPosition(insertPosition);
   }
 
   return (
@@ -89,11 +90,11 @@ export function InsertPositionDialog({
               defaultValue="top"
               className="flex w-64 flex-shrink-0 flex-col gap-4 rounded-md"
               value={selectedPosition ?? undefined}
-              onValueChange={(val: (typeof options)[number]) =>
+              onValueChange={(val: (typeof insertOptions)[number]) =>
                 handleSelect(val)
               }
             >
-              {options.map((option) => (
+              {insertOptions.map((option) => (
                 <div key={option}>
                   <RadioGroupItem
                     key={option}
@@ -127,12 +128,12 @@ export function InsertPositionDialog({
     </LayoutGroup>
   );
 }
-interface InsertPositionContextProps {
+interface InsertDefuseContextProps {
   isDialogOpen: boolean;
-  handleConfirm(): void;
+  handleConfirm(pos: (typeof insertOptions)[number]): void;
   handleCancel(): void;
 }
-const InsertPositionContext = createContext<InsertPositionContextProps | null>(
+const InsertPositionContext = createContext<InsertDefuseContextProps | null>(
   null,
 );
 interface InsertPositionProviderProps {
@@ -157,9 +158,8 @@ export function InsertPositionProvider({
     setIsDialogOpen(false);
   });
 
-  function handleConfirm() {
-    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE);
-
+  function handleConfirm(pos: (typeof insertOptions)[number]) {
+    socket.emit(GAME_ACTIONS.CLIENT_RESPONSE, { insertPosition: pos });
     setIsDialogOpen(false);
   }
 
@@ -171,7 +171,7 @@ export function InsertPositionProvider({
   }
 
   useEffect(() => {
-    socket.on(GAME_REQUESTS.INSERT_CARD, async () => {
+    socket.on(GAME_REQUESTS.INSERT_DEFUSE, async () => {
       setIsDialogOpen(true);
     });
 
@@ -193,7 +193,7 @@ export function InsertPositionProvider({
   );
 }
 
-export function useInsertPosition() {
+export function useInsertDefuse() {
   const viewDeckCtx = useContext(InsertPositionContext);
   if (!viewDeckCtx) {
     throw new Error("useViewCard can only be used inside a ViewDeck provider");

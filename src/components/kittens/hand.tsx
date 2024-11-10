@@ -4,6 +4,7 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   canComboWith,
   canComboWithArray,
+  canPlayCards,
   KittenCard,
   KittenCardCard,
   KittenCardSkeleton,
@@ -48,6 +49,10 @@ export function Hand(props: HandProps) {
     if (selectedCards.includes(card))
       setSelectedCards((x) => x.filter((y) => y.cardId !== card.cardId));
     else {
+      if (selectedCards.length <= 0) {
+        setSelectedCards((x) => x.concat(card));
+      }
+      if (!canComboWithArray(card, selectedCards)) return;
       setSelectedCards((x) => x.concat(card));
     }
 
@@ -121,12 +126,24 @@ export function Hand(props: HandProps) {
                   hoveredCard?.cardId === card.cardId && "opacity-0",
                 )}
               >
+                {isCardSelected(card) && card.isCatCard && (
+                  <div
+                    className={cn("absolute -top-4 flex w-full items-center")}
+                  >
+                    <span className="mx-auto text-center text-xs">
+                      Paired with {card.name}
+                    </span>
+                  </div>
+                )}
                 <KittenCard card={card} />
                 <div
                   className={cn(
                     "absolute inset-0 z-10 rounded-lg bg-black opacity-0 transition-all duration-150",
                     selectedCards.length > 0 &&
                       !canComboWithArray(card, selectedCards) &&
+                      "opacity-35",
+                    selectedCards.length > 2 &&
+                      !selectedCards.includes(card) &&
                       "opacity-35",
                   )}
                 />
@@ -161,6 +178,15 @@ export function Hand(props: HandProps) {
                   className="pointer-events-none absolute"
                   style={{ zIndex: 10 }}
                 >
+                  {isCardSelected(hoveredCard) && hoveredCard.isCatCard && (
+                    <div
+                      className={cn("absolute -top-4 flex w-full items-center")}
+                    >
+                      <span className="mx-auto text-center text-sm">
+                        Paired with {hoveredCard.name}
+                      </span>
+                    </div>
+                  )}
                   <KittenCardSkeleton card={hoveredCard} disabled={true} />
                 </motion.div>
               )}
@@ -169,7 +195,13 @@ export function Hand(props: HandProps) {
         )}
       </div>
       <div className="absolute inset-x-0 bottom-8 mx-auto max-w-fit">
-        <Card className="p-1">
+        <Card
+          className={cn(
+            "p-1 transition-all duration-150",
+            game.playerState?.isPlayersTurn &&
+              "ring ring-primary ring-offset-4 ring-offset-background",
+          )}
+        >
           <CardContent className="p-1">
             <div className="flex flex-col">
               <div className="flex items-center gap-4">
@@ -180,12 +212,14 @@ export function Hand(props: HandProps) {
                   className="h-16 w-56"
                   disabled={
                     !game.playerState?.isPlayersTurn ||
-                    selectedCards.length <= 0
+                    selectedCards.length <= 0 ||
+                    !canPlayCards(selectedCards)
                   }
                   onClick={() => {
                     if (selectedCards.length <= 0) return;
                     const gameId = game.gameState?.id;
                     if (!gameId) return;
+                    if (!canPlayCards(selectedCards)) return;
                     playCard(
                       gameId,
                       user.user.userId,

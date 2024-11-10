@@ -14,7 +14,6 @@ const baseExpansionCards = [
   { cardType: CardType.SHUFFLE, amount: 4 },
   { cardType: CardType.SKIP, amount: 4 },
 ];
-
 export const baseExpansion: Expansion = {
   expansionType: "Original",
   deck: baseExpansionCards,

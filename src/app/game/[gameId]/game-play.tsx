@@ -15,9 +15,9 @@ import { Yusei_Magic } from "next/font/google";
 import Loader from "@/components/loader";
 import { PickCardDialog, usePickCard } from "@/components/pick-card-dialog";
 import {
-  InsertPositionDialog,
+  InsertDefuseDialog,
   InsertPositionProvider,
-  useInsertPosition,
+  useInsertDefuse as useInsertDefuse,
 } from "@/components/insert-position-dialog";
 
 export function GamePlay() {
@@ -54,7 +54,7 @@ export function GamePlay() {
     isDialogOpen: isInsertOpen,
     handleConfirm: handleInsertConfirm,
     handleCancel: handleInsertCancel,
-  } = useInsertPosition();
+  } = useInsertDefuse();
 
   if (gameStatus === "notFound") {
     return <div>Game not found</div>;
@@ -101,7 +101,7 @@ export function GamePlay() {
           onConfirm={handleConfirmViewDeck}
           onCancel={handleCencelViewDeck}
         />
-        <InsertPositionDialog
+        <InsertDefuseDialog
           open={isInsertOpen}
           onConfirm={handleInsertConfirm}
           onCancel={handleInsertCancel}

@@ -48,7 +48,7 @@ export default class DeckManger {
       });
     });
 
-    const explodingKittenCount = players.length - 1;
+    const explodingKittenCount = players.length - 1 + 50;
     Array.from(Array(explodingKittenCount).keys()).forEach(() => {
       this.addCard(new ExplodingKitten());
     });

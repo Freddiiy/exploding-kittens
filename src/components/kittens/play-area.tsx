@@ -2,7 +2,7 @@ import { useUser } from "../user-context";
 import { cn } from "@/lib/utils";
 import { H2 } from "../ui/typography";
 import { KittenCardBackface, KittenCardCard } from "./card";
-import { drawCard, playCard as playCards } from "@/lib/actions";
+import { drawCard, playCard } from "@/lib/actions";
 import { useGame } from "../game-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
@@ -12,21 +12,6 @@ import { Button } from "../ui/button";
 
 export function PlayArea() {
   const { gameState, playerState, lastPlayedCard } = useGame();
-  const [playedCardId, setPlayedCardId] = useState<string | null>(null);
-  const [isSelectCardsDialogOpen, setSelectCardsDialogOpen] = useState(false);
-  function getAvailableCards(playedCardId: string) {
-    return (
-      playerState?.playerHandOfCards
-        .filter(
-          (card) =>
-            playerState.playerHandOfCards.find(
-              (card) => card.cardId === playedCardId,
-            )?.type === card.type,
-        )
-        .filter((x) => playedCardId !== x.cardId) ?? []
-    );
-  }
-
   const { user } = useUser();
   const { canBeNoped } = useNopeTimer();
 
@@ -127,24 +112,6 @@ export function PlayArea() {
           </AnimatePresence>
         </div>
       </div>
-      <SelectCardDialog
-        open={isSelectCardsDialogOpen}
-        onOpenChange={setSelectCardsDialogOpen}
-        cards={getAvailableCards(playedCardId ?? "")}
-        onConfirm={(cardIds) => {
-          const gameId = gameState?.id;
-          const parentCardId = playedCardId;
-          if (gameId && parentCardId) {
-            playCards(gameId, user.userId, [parentCardId, ...(cardIds ?? [])]);
-            setPlayedCardId(null);
-            setSelectCardsDialogOpen(false);
-          }
-        }}
-        onCancel={() => {
-          setPlayedCardId(null);
-          setSelectCardsDialogOpen(false);
-        }}
-      />
     </div>
   );
 }

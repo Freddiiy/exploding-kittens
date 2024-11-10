@@ -1,4 +1,3 @@
-import { BaseCardJSON } from "@/models/cards/_BaseCard";
 import {
   type DrawCardHandler,
   GAME_ACTIONS,
@@ -13,6 +12,7 @@ export function playCard(gameId: string, playerId: string, cardIds: string[]) {
     playerId,
     cardIds,
   };
+
   socket.emit(GAME_ACTIONS.PLAY_CARD, cardsToPlay);
 }
 

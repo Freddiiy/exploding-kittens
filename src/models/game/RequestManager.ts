@@ -3,6 +3,8 @@ import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { type PlayerClient } from "@/services/GameService";
 import { Game } from "./Game";
 import { Player } from "../Player";
+import { Inter } from "next/font/google";
+import { insertOptions } from "@/components/insert-position-dialog";
 
 export class RequestManager {
   private game: Game;
@@ -24,16 +26,37 @@ export class RequestManager {
     return res.cardId;
   }
 
-  async requestInsertPosition(player: Player) {
+  async requestInsertDefuse(player: Player) {
     const pos = await this.sendPlayerRequest(
       player.getId(),
-      GAME_REQUESTS.INSERT_CARD,
+      GAME_REQUESTS.INSERT_DEFUSE,
       {
         deckAmount: this.game.getDeckManger().getDeck().length,
       },
     );
 
-    return pos.insertPosition;
+    switch (pos.insertPosition) {
+      case "Top":
+        return 0;
+      case "Second":
+        return 1;
+      case "Third":
+        return 2;
+      case "Forth":
+        return 3;
+      case "Fifth":
+        return 4;
+      case "Bottom":
+        return this.game.getDeckManger().getDeckSize() - 1; // Assuming `deck` is defined as the array representing the deck.
+      case "Random":
+        return Math.floor(
+          Math.random() * this.game.getDeckManger().getDeckSize(),
+        );
+      default:
+        return Math.floor(
+          Math.random() * this.game.getDeckManger().getDeckSize(),
+        );
+    }
   }
 
   async requestPickCardFromPlayer(fromPlayer: Player, toPlayer: Player) {
@@ -205,7 +228,7 @@ export interface InsertCardRequest {
 }
 
 export interface InsertCardResponse {
-  insertPosition: number;
+  insertPosition: (typeof insertOptions)[number];
 }
 
 export type GAME_REQUEST = (typeof GAME_REQUESTS)[keyof typeof GAME_REQUESTS];
@@ -219,11 +242,11 @@ export const GAME_REQUESTS = {
   CHOOSE_PLAYER: "choosePlayer",
   CANCEL_DIALOG: "cancelDialogs",
   VIEW_DECK_CARDS: "viewDeckCards",
-  INSERT_CARD: "insertCard",
+  INSERT_DEFUSE: "insertDefuse",
 } as const;
 
 export interface ClientRequestMap {
-  [GAME_REQUESTS.INSERT_CARD]: {
+  [GAME_REQUESTS.INSERT_DEFUSE]: {
     request: InsertCardRequest;
     response: InsertCardResponse;
   };

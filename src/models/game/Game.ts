@@ -142,13 +142,13 @@ export class Game {
     this.turnManager.handleCardDrawn();
 
     if (card) {
-      player.addCardToHand(card);
       if (card.getType() === CardType.EXPLODING_KITTEN) {
         await this.handleExplodingKitten(player);
+        return;
       }
+      player.addCardToHand(card);
       // Handle the turn after drawing a card
     }
-
     return card;
   }
 
@@ -174,15 +174,18 @@ export class Game {
           player.removeCardFromHand(explodingKitten.getId());
         }
         this.getDeckManger().addToDiscardPile(defuseCard);
-
         const insertExplodingKittenPosition =
-          await this.getRequestManager().requestInsertPosition(player);
+          await this.getRequestManager().requestInsertDefuse(player);
+
         this.getDeckManger().insertCard(
           new ExplodingKitten(),
           insertExplodingKittenPosition,
         );
+        //this.requestManager.broadcastDefuseUsed(player);
 
-        this.requestManager.broadcastDefuseUsed(player);
+        console.log("before end turn");
+        this.getTurnManger().endTurn();
+        console.log("after end turn");
       } else {
         // Player chose not to use a Defuse card (shouldn't happen in normal gameplay)
         await this.eliminatePlayer(player);
