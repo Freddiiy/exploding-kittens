@@ -1,16 +1,6 @@
 "use client";
 
-import { CardType } from "@/models/cards/_CardType";
-import { KittenCard, KittenCardBackface, KittenCardCard } from "./card";
 import { PlayArea } from "./play-area";
-import {
-  CollisionDetection,
-  DndContext,
-  DragOverlay,
-  pointerWithin,
-  rectIntersection,
-  type DragStartEvent,
-} from "@dnd-kit/core";
 import { Hand } from "./hand";
 import { useGame } from "../game-provider";
 import { PlayerAvatar } from "../game-avatar";
