@@ -59,6 +59,31 @@ export function GameProvider({ children }: GameProviderProps) {
 
   const { user } = useUser();
 
+  // Handle disconnection when user leaves the page
+  useEffect(() => {
+    const handleDisconnect = () => {
+      if (connected && user) {
+        socket.emit(GAME_ACTIONS.DISCONNECT, {
+          gameId,
+          player: user,
+        });
+        setConnected(false);
+      }
+    };
+
+    // Handle tab/window close
+    window.addEventListener("beforeunload", handleDisconnect);
+
+    // Handle navigation away (back button, etc)
+    window.addEventListener("popstate", handleDisconnect);
+
+    return () => {
+      handleDisconnect();
+      window.removeEventListener("beforeunload", handleDisconnect);
+      window.removeEventListener("popstate", handleDisconnect);
+    };
+  }, [connected, gameId, user]);
+
   useEffect(() => {
     const attemptConnection = () => {
       if (!connected) {

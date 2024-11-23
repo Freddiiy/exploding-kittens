@@ -12,8 +12,12 @@ export class FavorEffect implements CardEffect {
       throw new Error("Could not find targeted player");
     }
 
-    await requestManager.requestGiveCardToPlayer(targetPlayer, player);
-    game.sendGameState();
+    game
+      .getActionmanager()
+      .addNopeTimerCallback(
+        async () =>
+          await requestManager.requestGiveCardToPlayer(targetPlayer, player),
+      );
   }
 
   getDescription(): string {

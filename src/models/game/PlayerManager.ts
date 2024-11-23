@@ -41,11 +41,7 @@ export default class PlayerManager {
   }
 
   removePlayer(playerId: string) {
-    const index = this.players.findIndex((p) => p.getId() === playerId);
-    if (index !== -1) {
-      this.players.splice(index, 1);
-    }
-
+    this.players = this.players.filter((p) => p.getId() !== playerId);
     return this.getPlayers();
   }
 
