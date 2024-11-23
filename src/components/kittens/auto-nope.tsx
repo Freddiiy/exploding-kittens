@@ -162,7 +162,9 @@ export function NopeTimer() {
           >
             NOPE
           </Button>
-          <P>( press space )</P>
+          <div className="flex justify-center text-sm">
+            <P>( press space )</P>
+          </div>
         </div>
       )}
     </div>
