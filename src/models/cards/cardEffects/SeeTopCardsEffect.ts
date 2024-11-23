@@ -1,6 +1,6 @@
 import { type Game } from "../../game/Game";
-import { Player } from "../../Player";
-import { CardEffect } from "./CardEffect";
+import { type Player } from "../../Player";
+import { type CardEffect } from "./CardEffect";
 
 export class SeeTopCardsEffect implements CardEffect {
   numberOfCards: number;

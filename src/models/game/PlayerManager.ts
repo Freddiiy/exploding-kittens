@@ -3,7 +3,7 @@ import type BaseCard from "../cards/_BaseCard";
 import { type Player } from "../Player";
 import { type PlayerClient } from "../../services/GameService";
 import type GameService from "../../services/GameService";
-import { Game } from "./Game";
+import { type Game } from "./Game";
 
 export default class PlayerManager {
   private gameService: GameService;

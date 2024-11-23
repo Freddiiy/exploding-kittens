@@ -2,7 +2,7 @@
 
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { generateRandomId } from "@/lib/generateRandomId";
-import { PlayerData } from "@/models/Player";
+import { type PlayerData } from "@/models/Player";
 
 import {
   type Dispatch,

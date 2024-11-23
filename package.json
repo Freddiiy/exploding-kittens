@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "lint": "next lint",
+    "lintFix": "next lint --fix",
     "start": "cross-env NODE_ENV=production tsx server.ts",
     "postinstall": "prisma generate"
   },
@@ -78,6 +79,7 @@
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.4",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",

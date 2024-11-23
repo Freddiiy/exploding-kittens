@@ -1,6 +1,5 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { type BaseCardJSON } from "@/models/cards/_BaseCard";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
 
 interface HandProps<T> {
   items: T[];

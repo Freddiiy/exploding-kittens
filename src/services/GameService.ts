@@ -3,7 +3,7 @@ import { CardType } from "@/models/cards/_CardType";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
-import { ClientRequestMap, GAME_REQUEST } from "@/models/game/RequestManager";
+import { type ClientRequestMap, GAME_REQUEST } from "@/models/game/RequestManager";
 import { Player, type PlayerData } from "@/models/Player";
 import { type Server, type Socket } from "socket.io";
 

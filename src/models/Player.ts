@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type BaseCard from "./cards/_BaseCard";
-import { PlayerClient } from "@/services/GameService";
+import { type PlayerClient } from "@/services/GameService";
 
 export const playerOtionsSchema = z.object({
   userId: z.string().min(16).max(16),

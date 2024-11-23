@@ -1,6 +1,6 @@
 import { type Game } from "@/models/game/Game";
-import { Player } from "@/models/Player";
-import { CardEffect } from "./CardEffect";
+import { type Player } from "@/models/Player";
+import { type CardEffect } from "./CardEffect";
 
 export default class DefuseEffect implements CardEffect {
   apply(game: Game, player: Player): void {

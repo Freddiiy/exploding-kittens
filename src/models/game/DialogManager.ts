@@ -1,6 +1,6 @@
 import { type Game } from "./Game";
 import {
-  ClientRequestMap,
+  type ClientRequestMap,
   GAME_REQUESTS,
   type GAME_REQUEST,
 } from "./RequestManager";

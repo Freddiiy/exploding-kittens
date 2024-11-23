@@ -3,7 +3,7 @@ import {
   type ChoosePlayerResponse,
   GAME_REQUESTS,
 } from "@/models/game/RequestManager";
-import { PlayerClient, GAME_ACTIONS } from "@/services/GameService";
+import { type PlayerClient, GAME_ACTIONS } from "@/services/GameService";
 import { socket } from "@/trpc/socket";
 import { useState, useEffect } from "react";
 import { useGameId, useCancelDialog } from "./game-provider";

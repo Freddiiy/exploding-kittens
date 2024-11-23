@@ -1,5 +1,5 @@
 import type BaseCard from "../cards/_BaseCard";
-import { BaseCardJSON } from "../cards/_BaseCard";
+import { type BaseCardJSON } from "../cards/_BaseCard";
 import { CardFactory } from "../cards/_CardFactory";
 import Defuse from "../cards/Defuse";
 import ExplodingKitten from "../cards/ExplodingKitten";

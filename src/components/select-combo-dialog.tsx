@@ -7,33 +7,21 @@ import {
   TransparentAlertDialogHeader,
   TransparentAlertDialogTitle,
 } from "./ui/transparent-alert-dialog";
-import { GAME_ACTIONS, type PlayerClient } from "@/services/GameService";
 import { Button } from "./ui/button";
 import {
   createContext,
-  Dispatch,
-  SetStateAction,
+  type Dispatch,
+  type SetStateAction,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from "react";
 import { H3 } from "./ui/typography";
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
-import { Hand } from "./kittens/hand";
-import { HandContainer } from "./hand-container";
-import { KittenCard, KittenCardCard } from "./kittens/card";
+import { KittenCardCard } from "./kittens/card";
 import { LayoutGroup, motion } from "framer-motion";
-import {
-  type GiveCardResponse,
-  GAME_REQUESTS,
-} from "@/models/game/RequestManager";
-import { socket } from "@/trpc/socket";
-import { useGameId, useCancelDialog, useGame } from "./game-provider";
-import { useNopeTimer } from "./kittens/auto-nope";
 
 interface ViewDeckDialogProps {
   open: boolean;

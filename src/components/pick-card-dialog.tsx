@@ -7,7 +7,7 @@ import {
   TransparentAlertDialogHeader,
   TransparentAlertDialogTitle,
 } from "./ui/transparent-alert-dialog";
-import { GAME_ACTIONS, type PlayerClient } from "@/services/GameService";
+import { GAME_ACTIONS } from "@/services/GameService";
 import { Button } from "./ui/button";
 import {
   createContext,
@@ -20,18 +20,13 @@ import { H3 } from "./ui/typography";
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { type BaseCardJSON } from "@/models/cards/_BaseCard";
-import { Hand } from "./kittens/hand";
 import { HandContainer } from "./hand-container";
-import { KittenCardBackface, KittenCardCard } from "./kittens/card";
-import { LayoutGroup, motion } from "framer-motion";
+import { KittenCardBackface } from "./kittens/card";
+import { LayoutGroup } from "framer-motion";
 import {
-  type GiveCardResponse,
   GAME_REQUESTS,
-  InsertCardRequest,
-  InsertCardResponse,
-  PickCardRequest,
-  PickCardResponse,
+  type PickCardRequest,
+  type PickCardResponse,
 } from "@/models/game/RequestManager";
 import { socket } from "@/trpc/socket";
 import { useGameId, useCancelDialog } from "./game-provider";

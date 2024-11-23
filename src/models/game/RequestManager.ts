@@ -1,10 +1,10 @@
 import type BaseCard from "@/models/cards/_BaseCard";
 import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { GAME_ACTIONS, type PlayerClient } from "@/services/GameService";
-import { Game } from "./Game";
-import { Player } from "../Player";
+import { type Game } from "./Game";
+import { type Player } from "../Player";
 import { Inter } from "next/font/google";
-import { insertOptions } from "@/components/insert-position-dialog";
+import { type insertOptions } from "@/components/insert-position-dialog";
 
 export class RequestManager {
   private game: Game;

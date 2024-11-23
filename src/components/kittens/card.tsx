@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CardType } from "@/models/cards/_CardType";
+import { type CardType } from "@/models/cards/_CardType";
 import Image from "next/image";
 import {
   type ReactNode,
@@ -22,7 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Artifika } from "next/font/google";
 import { createPortal } from "react-dom";
-import { BaseCardJSON } from "@/models/cards/_BaseCard";
+import { type BaseCardJSON } from "@/models/cards/_BaseCard";
 import { explodingKittenCharacters } from "@/models/characters";
 import { P } from "../ui/typography";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";

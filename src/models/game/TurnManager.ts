@@ -1,5 +1,5 @@
 import { type Player } from "../Player";
-import { Game } from "./Game";
+import { type Game } from "./Game";
 
 export default class TurnManager {
   private currentPlayerId: string | null = null;

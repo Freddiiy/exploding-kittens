@@ -3,7 +3,7 @@
 import {
   createContext,
   Dispatch,
-  ReactNode,
+  type ReactNode,
   SetStateAction,
   useContext,
   useEffect,
