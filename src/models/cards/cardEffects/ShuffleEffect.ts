@@ -4,6 +4,6 @@ import { type CardEffect } from "./CardEffect";
 
 export class ShuffleEffect implements CardEffect {
   apply(game: Game, player: Player): void {
-    game.getDeckManger().shuffle();
+    game.getDeckManger().shuffleDeck();
   }
 }
