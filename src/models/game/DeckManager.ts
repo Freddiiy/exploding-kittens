@@ -55,11 +55,6 @@ export default class DeckManger {
       this.addCard(new ExplodingKitten());
     });
 
-    Array.from({ length: 50 }).forEach(() => {
-      this.addCard(new SeeTheFuture());
-      this.addCard(new Nope());
-    });
-
     this.shuffle();
   }
 
