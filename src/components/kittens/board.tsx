@@ -22,12 +22,12 @@ export function Board() {
   const { user } = useUser();
   return (
     <div className="overflow-hidden">
-      <div className="relative grid max-h-screen min-h-screen grid-rows-12">
+      <div className="flex max-h-screen min-h-screen grid-rows-12 flex-col justify-between">
         <div
           id="other players"
-          className="relative row-span-1 flex justify-center"
+          className="flex flex-col items-center justify-center"
         >
-          <div className="flex gap-1 pt-4">
+          <div className="flex gap-1">
             {gameState?.players
               .filter((player) => player.id !== user.userId)
               .map((player) => {
@@ -36,7 +36,7 @@ export function Board() {
                     key={player.id}
                     className="flex flex-col items-center -space-y-10"
                   >
-                    <div className="relative flex h-card-height w-card-width items-center justify-center">
+                    <div className="relative flex size-32 items-center justify-center">
                       <PlayerAvatar
                         user={player}
                         size="sm"
@@ -52,18 +52,13 @@ export function Board() {
                 );
               })}
           </div>
+          <div>
+            <PlayArea />
+          </div>
         </div>
-        <div
-          id="board"
-          className="row-span-4 flex w-full flex-1 items-center justify-center p-4"
-        >
-          <PlayArea />
-        </div>
-        <div
-          id="player"
-          className="relative row-span-7 flex items-center justify-center"
-        >
-          <div className="absolute top-4 h-full w-full">
+
+        <div id="player" className="flex items-center justify-center">
+          <div className="h-full w-full">
             <div className="flex h-full w-full items-start justify-center">
               <Hand cards={playerState?.playerHandOfCards ?? []} />
             </div>

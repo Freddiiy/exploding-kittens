@@ -106,15 +106,19 @@ export function Hand(props: HandProps) {
 
           return (
             <motion.div
+              ref={ref}
               className={cn("absolute bottom-48 cursor-pointer")}
               key={card.cardId}
               layout={false}
               animate={animate}
               exit={"hidden"}
               transition={{ duration: isHovered ? 0.1 : 0.3 }}
-              onHoverStart={() => {
+              onHoverStart={(e) => {
                 setHoveredCardId(card.cardId);
-                setHoveredCardPosition({ x, y });
+                setHoveredCardPosition({
+                  x,
+                  y: y - 450,
+                });
               }}
               onHoverEnd={() => setHoveredCardId(null)}
               onClick={() => {
@@ -162,27 +166,28 @@ export function Hand(props: HandProps) {
                 <motion.div
                   key={hoveredCard.cardId}
                   initial={{
+                    scale: 1.5,
                     x: hoveredCardPosition.x,
-                    y: 100,
+                    y: hoveredCardPosition.y + 150,
                   }}
                   animate={{
                     scale: 1.5,
                     x: hoveredCardPosition.x,
-                    y: isCardSelected(hoveredCard) ? 50 : 90,
+                    y: isCardSelected(hoveredCard)
+                      ? hoveredCardPosition.y + 70
+                      : hoveredCardPosition.y + 120,
                   }}
                   exit={{
                     opacity: 0,
-                    x: hoveredCardPosition.x,
-                    y: 100,
+                    x: hoveredCardPosition.y,
+                    y: hoveredCardPosition.y + 150,
                   }}
                   transition={{ duration: 0.1 }}
-                  className="pointer-events-none absolute"
+                  className="pointer-events-none"
                   style={{ zIndex: 10 }}
                 >
                   {isCardSelected(hoveredCard) && hoveredCard.isCatCard && (
-                    <div
-                      className={cn("absolute -top-4 flex w-full items-center")}
-                    >
+                    <div className={cn("flex w-full items-center")}>
                       <span className="mx-auto text-center text-sm">
                         Paired with {hoveredCard.name}
                       </span>
