@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { useUser } from "../user-context";
 import { playCard } from "@/lib/actions";
 import { CardType } from "@/models/cards/_CardType";
+import { P } from "../ui/typography";
 
 interface NopeTimerContextProps {
   progress: number;
@@ -150,7 +151,7 @@ export function NopeTimer() {
         <Progress value={progress} />
       </div>
       {hasNopeOnHand && (
-        <div>
+        <div className="flex flex-col gap-1">
           <Button
             type="button"
             variant={"destructive"}
@@ -161,6 +162,7 @@ export function NopeTimer() {
           >
             NOPE
           </Button>
+          <P>( press space )</P>
         </div>
       )}
     </div>

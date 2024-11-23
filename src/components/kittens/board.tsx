@@ -17,7 +17,7 @@ export function Board() {
           id="other players"
           className="flex flex-col items-center justify-center"
         >
-          <div className="flex gap-1">
+          <div className="flex h-32 gap-1">
             {gameState?.players
               .filter((player) => player.id !== user.userId)
               .map((player) => {

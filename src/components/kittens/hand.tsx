@@ -106,7 +106,6 @@ export function Hand(props: HandProps) {
 
           return (
             <motion.div
-              ref={ref}
               className={cn("absolute bottom-48 cursor-pointer")}
               key={card.cardId}
               layout={false}

@@ -128,7 +128,7 @@ export class Game {
   }
 
   async drawCard(player: Player) {
-    if (this.actionManager.getNopeTimeout()) {
+    if (this.actionManager.getIsNopeTimeoutActive()) {
       throw new Error("Nope timer is active");
     }
 
@@ -306,5 +306,9 @@ export class Game {
 
   getDialogManager() {
     return this.dialogManager;
+  }
+
+  getActionmanager() {
+    return this.actionManager;
   }
 }

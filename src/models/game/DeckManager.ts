@@ -3,6 +3,8 @@ import { BaseCardJSON } from "../cards/_BaseCard";
 import { CardFactory } from "../cards/_CardFactory";
 import Defuse from "../cards/Defuse";
 import ExplodingKitten from "../cards/ExplodingKitten";
+import Nope from "../cards/original/Nope";
+import SeeTheFuture from "../cards/original/SeeTheFuture";
 import { type Expansion } from "../expansions/_ExpansionInterface";
 import { baseExpansion } from "../expansions/BaseDeck";
 import { type Player } from "../Player";
@@ -51,6 +53,11 @@ export default class DeckManger {
     const explodingKittenCount = players.length - 1;
     Array.from(Array(explodingKittenCount).keys()).forEach(() => {
       this.addCard(new ExplodingKitten());
+    });
+
+    Array.from({ length: 50 }).forEach(() => {
+      this.addCard(new SeeTheFuture());
+      this.addCard(new Nope());
     });
 
     this.shuffle();

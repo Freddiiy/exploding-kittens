@@ -14,6 +14,8 @@ export const NOPE_TIMER = 5500;
 export class ActionManager {
   private currentAction: CurrentAction | null = null;
   private nopeTimeout: NodeJS.Timeout | null = null;
+
+  private nopeCallbacks: Array<() => void> = [];
   private game: Game;
   private gameService: GameService;
   private playerManager: PlayerManager;
@@ -29,6 +31,8 @@ export class ActionManager {
     this.gameService = gameService;
     this.playerManager = playerManager;
     this.stateManager = stateManager;
+
+    this.nopeCallbacks = [];
   }
 
   async playCards(player: Player, cards: BaseCard[]) {
@@ -44,7 +48,7 @@ export class ActionManager {
       throw new Error("It's not your turn");
     }
 
-    if (this.getNopeTimeout()) {
+    if (this.getIsNopeTimeoutActive()) {
       throw new Error("Nope timer is active");
     }
 
@@ -93,13 +97,24 @@ export class ActionManager {
     this.startNopeTimer(); // Restart the timer
   }
 
-  private startNopeTimer() {
+  async startNopeTimer() {
     if (this.nopeTimeout) {
       clearTimeout(this.nopeTimeout);
     }
+
     this.nopeTimeout = setTimeout(() => {
       this.resolveAction();
     }, NOPE_TIMER); // 5 seconds window for Nope cards
+  }
+
+  addNopeTimerCallback(callback: () => void) {
+    if (callback) {
+      this.nopeCallbacks.push(callback);
+    }
+  }
+
+  removeNopeTimerCallback(callback: () => void) {
+    this.nopeCallbacks = this.nopeCallbacks.filter((cb) => cb !== callback);
   }
 
   private resolveAction() {
@@ -107,12 +122,15 @@ export class ActionManager {
 
     if (this.currentAction.nopeCount % 2 === 0) {
       // Action proceeds (final)
+      this.nopeCallbacks.forEach((cb) => cb());
       this.broadcastActionResolved();
     } else {
       // Action is noped (final)
       this.broadcastActionNoped();
       this.cancelCurrentDialogs();
     }
+
+    this.nopeCallbacks = [];
 
     this.currentAction = null;
     this.nopeTimeout = null;
@@ -244,8 +262,12 @@ export class ActionManager {
     });
   }
 
-  getNopeTimeout() {
+  getIsNopeTimeoutActive() {
     return this.nopeTimeout !== null;
+  }
+
+  getNopeTimeout() {
+    return this.nopeTimeout;
   }
 }
 
