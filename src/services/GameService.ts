@@ -3,7 +3,10 @@ import { CardType } from "@/models/cards/_CardType";
 import { type Expansion } from "@/models/expansions/_ExpansionInterface";
 import { baseExpansion } from "@/models/expansions/BaseDeck";
 import { Game, type GameStatus, type GameSettings } from "@/models/game/Game";
-import { type ClientRequestMap, GAME_REQUEST } from "@/models/game/RequestManager";
+import {
+  type ClientRequestMap,
+  GAME_REQUEST,
+} from "@/models/game/RequestManager";
 import { Player, type PlayerData } from "@/models/Player";
 import { type Server, type Socket } from "socket.io";
 
@@ -24,29 +27,9 @@ export default class GameService {
       this.handleGetRooms(socket);
       this.handlePlayCard(socket);
       this.handleDrawCard(socket);
+      this.handleWantedDisconnect(socket);
 
-      socket.on("disconnect", () => {
-        console.log("PLAYER DISCONNECTED");
-        const game = Array.from(this.games.values()).find((x) =>
-          x
-            .getPlayerManager()
-            .getPlayers()
-            .find((p) => p.getSocketId() === socket.id),
-        );
-
-        if (game) {
-          const player = game
-            .getPlayerManager()
-            .getPlayers()
-            .find((x) => x.getSocketId() === socket.id);
-
-          if (player) {
-            console.log(player.getUsername() + " disconnected");
-            game.disconnectPlayer(player.getId());
-            this.sendGameState(game.getId());
-          }
-        }
-      });
+      socket.on("disconnect", () => this.handleDisconnectEvent(socket));
     });
   }
 
@@ -193,6 +176,42 @@ export default class GameService {
         this.sendGameState(gameId);
       },
     );
+  }
+
+  private handleWantedDisconnect(socket: Socket) {
+    socket.on(GAME_ACTIONS.DISCONNECT, () => {
+      this.handleDisconnectEvent(socket);
+    });
+  }
+
+  private handleDisconnectEvent(socket: Socket) {
+    const game = Array.from(this.games.values()).find((x) =>
+      x
+        .getPlayerManager()
+        .getPlayers()
+        .find((p) => p.getSocketId() === socket.id),
+    );
+
+    if (game) {
+      const player = game
+        .getPlayerManager()
+        .getPlayers()
+        .find((x) => x.getSocketId() === socket.id);
+
+      if (game.isStarted()) {
+        if (player) {
+          console.log(player.getUsername() + " disconnected");
+          game.disconnectPlayer(player.getId());
+          this.sendGameState(game.getId());
+        }
+      } else {
+        if (player) {
+          console.log("game is not started");
+          game.getPlayerManager().removePlayer(player.getId());
+        }
+      }
+      this.sendGameState(game.getId());
+    }
   }
 
   private handleGetSync(socket: Socket) {

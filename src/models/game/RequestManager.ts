@@ -86,7 +86,9 @@ export class RequestManager {
       cardIdx >= 0 &&
       cardIdx < fromPlayer.getHandSize()
     ) {
-      const foundCard = fromPlayer.getHand().at(cardIdx);
+      const playerHand = fromPlayer.getHand();
+      const shuffled = this.game.getDeckManger().shuffle(playerHand);
+      const foundCard = shuffled.at(cardIdx);
       if (!foundCard) {
         throw new Error("No card found");
       }

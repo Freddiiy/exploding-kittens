@@ -15,7 +15,7 @@ export class ActionManager {
   private currentAction: CurrentAction | null = null;
   private nopeTimeout: NodeJS.Timeout | null = null;
 
-  private nopeCallbacks: Array<() => void> = [];
+  private nopeCallbacks: Array<() => void | Promise<void>> = [];
   private game: Game;
   private gameService: GameService;
   private playerManager: PlayerManager;
@@ -65,7 +65,7 @@ export class ActionManager {
       originalPlayer: player,
     };
 
-    this.stateManager.saveState(this.game); // Save state before action
+    this.stateManager.saveState(this.game);
 
     this.broadcastActionInitiated();
 
@@ -107,9 +107,11 @@ export class ActionManager {
     }, NOPE_TIMER); // 5 seconds window for Nope cards
   }
 
-  addNopeTimerCallback(callback: () => void) {
+  addNopeTimerCallback(callback: () => void | Promise<void>) {
     if (callback) {
-      this.nopeCallbacks.push(callback);
+      this.nopeCallbacks.push(async () => {
+        await callback();
+      });
     }
   }
 
@@ -117,12 +119,14 @@ export class ActionManager {
     this.nopeCallbacks = this.nopeCallbacks.filter((cb) => cb !== callback);
   }
 
-  private resolveAction() {
+  async resolveAction() {
     if (!this.currentAction) return;
 
     if (this.currentAction.nopeCount % 2 === 0) {
       // Action proceeds (final)
-      this.nopeCallbacks.forEach((cb) => cb());
+      for (const cb of this.nopeCallbacks) {
+        await cb();
+      }
       this.broadcastActionResolved();
     } else {
       // Action is noped (final)
@@ -134,6 +138,8 @@ export class ActionManager {
 
     this.currentAction = null;
     this.nopeTimeout = null;
+
+    this.game.sendGameState();
   }
 
   private async executeAction(action: NonNullable<typeof this.currentAction>) {

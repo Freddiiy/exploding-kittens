@@ -25,17 +25,24 @@ export default class DeckManger {
       });
     });
 
-    this.shuffle();
+    this.deck = this.shuffle(this.deck);
   }
 
   //Fisher-Yates shuffle algo
-  shuffle() {
-    this.deck.forEach((_, i) => {
+  shuffle(cards: BaseCard[]) {
+    const copyCards = [...cards];
+    copyCards.forEach((_, i) => {
       const j = Math.floor(Math.random() * (i + 1));
-      if (this.deck[i] !== undefined && this.deck[j] !== undefined) {
-        [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+      if (copyCards[i] !== undefined && copyCards[j] !== undefined) {
+        [copyCards[i], copyCards[j]] = [copyCards[j], copyCards[i]];
       }
     });
+
+    return copyCards;
+  }
+
+  shuffleDeck() {
+    this.deck = this.shuffle(this.deck);
   }
 
   dealCards(players: Player[]) {
@@ -55,7 +62,7 @@ export default class DeckManger {
       this.addCard(new ExplodingKitten());
     });
 
-    this.shuffle();
+    this.deck = this.shuffle(this.deck);
   }
 
   drawCard() {
