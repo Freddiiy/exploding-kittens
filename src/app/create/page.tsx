@@ -1,7 +1,7 @@
 "use client";
 import { PlayerEditor } from "../../components/player-editor";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -15,6 +15,7 @@ import { useUser } from "@/components/user-context";
 import { socket } from "@/trpc/socket";
 import { GAME_ACTIONS } from "@/services/GameService";
 import { useState } from "react";
+import { platform } from "os";
 
 export default function Page() {
   const { user, setUser } = useUser();
@@ -52,7 +53,10 @@ export default function Page() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4">
-            <PlayerEditor />
+            <PlayerEditor
+              player={form.watch("player")}
+              onPlayerChange={(player) => form.setValue("player", player)}
+            />
             <GameSettings />
             <Button size={"lg"} className="w-full" isLoading={isLoading}>
               Create game

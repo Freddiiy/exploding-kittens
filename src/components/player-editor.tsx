@@ -14,10 +14,28 @@ import { useFormContext } from "react-hook-form";
 import { explodingKittenCharacters } from "@/models/characters";
 import { type PlayerData } from "@/models/Player";
 import { AvatarSelector, GameAvatar } from "./game-avatar";
+import { Label } from "./ui/label";
 
-export function PlayerEditor() {
-  const form = useFormContext<{ player: PlayerData }>();
-
+interface PlayerEditorInterface {
+  player: PlayerData;
+  onPlayerChange: (player: PlayerData) => void;
+}
+export function PlayerEditor({
+  player,
+  onPlayerChange,
+}: PlayerEditorInterface) {
+  function handleUsernameChange(newUsername: string) {
+    onPlayerChange({
+      ...player,
+      username: newUsername,
+    });
+  }
+  function handleAvatarChange(newAvatar: string) {
+    onPlayerChange({
+      ...player,
+      avatar: newAvatar,
+    });
+  }
   return (
     <Card>
       <CardHeader>
@@ -25,45 +43,29 @@ export function PlayerEditor() {
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
-          <Form {...form}>
-            <FormField
-              control={form.control}
-              name="player.username"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-4">
-                    <FormLabel className="text-xl">Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} autoComplete="off" />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className="flex items-center gap-4">
+            <Label className="text-xl">Username</Label>
+            <Input
+              value={player.username}
+              onChange={(e) => handleUsernameChange(e.target.value)}
+              autoComplete="off"
             />
+          </div>
 
-            <div className="flex items-center justify-center gap-16">
-              <FormField
-                control={form.control}
-                name="player.avatar"
-                render={({ field }) => (
-                  <AvatarSelector
-                    value={field.value}
-                    onChange={(val) => field.onChange(val)}
-                  >
-                    <GameAvatar
-                      src={
-                        explodingKittenCharacters.find(
-                          (x) => x.name === field.value,
-                        )?.img ?? ""
-                      }
-                      fallback={form.watch("player.username").at(0) ?? ""}
-                    />
-                  </AvatarSelector>
-                )}
+          <div className="flex items-center justify-center gap-16">
+            <AvatarSelector
+              value={player.avatar}
+              onChange={(e) => handleAvatarChange(e)}
+            >
+              <GameAvatar
+                src={
+                  explodingKittenCharacters.find(
+                    (x) => x.name === player.avatar,
+                  )?.img ?? ""
+                }
               />
-            </div>
-          </Form>
+            </AvatarSelector>
+          </div>
         </div>
       </CardContent>
     </Card>

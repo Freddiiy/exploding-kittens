@@ -43,7 +43,7 @@ export function PlayerAvatar({
 
 interface GameAvatarProps {
   src: string;
-  fallback: string;
+  fallback?: string;
   className?: string;
 }
 
@@ -60,16 +60,18 @@ interface AvatarSelectorProps {
   value: string;
   onChange: (value: string) => void;
   children: ReactNode;
+  asChild?: boolean;
 }
 export function AvatarSelector({
   value,
   onChange,
   children,
+  asChild = false,
 }: AvatarSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>{children}</PopoverTrigger>
+      <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent className="w-fit" showArrow>
         <div className="grid grid-cols-3 gap-1">
           {explodingKittenCharacters.map((character) => (

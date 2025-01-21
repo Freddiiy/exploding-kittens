@@ -43,9 +43,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SocketProvider>
-            <UserProvider>{children}</UserProvider>
-          </SocketProvider>
+          <UserProvider>
+            <SocketProvider>{children}</SocketProvider>
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

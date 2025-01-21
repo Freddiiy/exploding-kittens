@@ -28,6 +28,7 @@ import {
   type InsertCardRequest,
   InsertCardResponse,
 } from "@/models/game/RequestManager";
+import { playerOtionsSchema } from "@/models/Player";
 
 interface GameContext {
   connected: boolean;
@@ -86,7 +87,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
   useEffect(() => {
     const attemptConnection = () => {
-      if (!connected) {
+      if (!connected && playerOtionsSchema.safeParse(user).success) {
         const joinHandlerObj: JoinGameHandler = {
           gameId,
           player: user,

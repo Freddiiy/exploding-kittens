@@ -11,17 +11,21 @@ import { H2 } from "@/components/ui/typography";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import { useViewDeck, ViewDeckDialog } from "@/components/view-deck-dialog";
-import { Yusei_Magic } from "next/font/google";
 import Loader from "@/components/loader";
 import { PickCardDialog, usePickCard } from "@/components/pick-card-dialog";
 import {
   InsertDefuseDialog,
-  InsertPositionProvider,
   useInsertDefuse as useInsertDefuse,
 } from "@/components/insert-position-dialog";
 import { BroadcastMessage } from "@/components/broadcast-message";
+import { useUser } from "@/components/user-context";
+import { PlayerEditor } from "@/components/player-editor";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { type PlayerData } from "../../../models/Player";
+import { Button } from "@/components/ui/button";
 
 export function GamePlay() {
+  const { user } = useUser();
   const { gameState, gameStatus } = useGame();
   const {
     isDialogOpen: isPlayerSelectionOpen,
@@ -56,6 +60,10 @@ export function GamePlay() {
     handleConfirm: handleInsertConfirm,
     handleCancel: handleInsertCancel,
   } = useInsertDefuse();
+
+  if (!user.userId || !user.username) {
+    return <GamePlayPlayerEditor />;
+  }
 
   if (gameStatus === "notFound") {
     return <div>Game not found</div>;
@@ -155,5 +163,38 @@ function YourTurnBroadcast() {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+function GamePlayPlayerEditor() {
+  const { user, setUser } = useUser();
+  const form = useForm<{ player: PlayerData }>({
+    defaultValues: { player: user },
+  });
+
+  const onSubmit: SubmitHandler<{ player: PlayerData }> = async (data) => {
+    setUser(data.player);
+  };
+
+  return (
+    <div className="mx-auto max-w-lg pt-12">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <PlayerEditor
+          player={form.watch("player")}
+          onPlayerChange={(player) => form.setValue("player", player)}
+        />
+        <Button
+          size={"lg"}
+          className="w-full"
+          disabled={
+            !form.watch("player").userId ||
+            !form.watch("player.username") ||
+            form.watch("player.username").length < 3
+          }
+        >
+          JOIN GAME
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -5,7 +5,7 @@ import { type PlayerClient } from "@/services/GameService";
 export const playerOtionsSchema = z.object({
   userId: z.string().min(16).max(16),
   username: z.string().min(3),
-  avatar: z.string(),
+  avatar: z.string().optional(),
 });
 export interface PlayerData {
   userId: string;

@@ -1,14 +1,20 @@
 "use client";
 
 import { CopyButton } from "@/components/copy-button";
-import { GameAvatar, PlayerAvatar } from "@/components/game-avatar";
+import {
+  AvatarSelector,
+  GameAvatar,
+  PlayerAvatar,
+} from "@/components/game-avatar";
 import { useGame, useGameId } from "@/components/game-provider";
+import { PlayerEditor } from "@/components/player-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H4, H6, Muted, P } from "@/components/ui/typography";
 import { useUser } from "@/components/user-context";
 import { startGame } from "@/lib/actions";
+import { explodingKittenCharacters } from "@/models/characters";
 import { useSocket } from "@/trpc/socket";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -40,6 +46,7 @@ export function Lobby() {
           </CardContent>
         </Card>
 
+        <LobbyPlayerEditor />
         <RoomCode />
 
         {isOwner && (
@@ -49,6 +56,7 @@ export function Lobby() {
               size={"lg"}
               className="w-full"
               onClick={() => startGame(gameState.id, user.userId)}
+              disabled={gameState.players.length < 2}
             >
               Start game
             </Button>
@@ -78,5 +86,50 @@ function RoomCode() {
       </div>
       <CopyButton className="h-10 w-10 rounded-l-none" value={fullUrl} />
     </div>
+  );
+}
+
+function LobbyPlayerEditor() {
+  const { user, setUser } = useUser();
+
+  function handleAvatarChange(avatar: string) {
+    setUser({
+      ...user,
+      avatar,
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Change avatar</CardTitle>
+      </CardHeader>
+      <CardContent className="flex items-center justify-center">
+        <AvatarSelector
+          value={user.avatar}
+          onChange={(e) => handleAvatarChange(e)}
+          asChild
+        >
+          <Button
+            type="button"
+            variant={"ghost"}
+            className="flex h-full flex-col items-center justify-center gap-2"
+          >
+            <GameAvatar
+              src={
+                explodingKittenCharacters.find((x) => x.name === user.avatar)
+                  ?.img ?? ""
+              }
+            />
+            <P>
+              {
+                explodingKittenCharacters.find((x) => x.name === user.avatar)
+                  ?.name
+              }
+            </P>
+          </Button>
+        </AvatarSelector>
+      </CardContent>
+    </Card>
   );
 }

@@ -77,7 +77,6 @@ export class Game {
     }
 
     this.turnManager.initializePlayerOrder(this.playerManager.getPlayers());
-    //TODO: Add additional locic: game start logic, deal cards etc
     this.deckManager.initDeck(this.getExpansions());
     this.deckManager.dealCards(this.playerManager.getPlayers());
     const players = this.playerManager.getPlayers();
