@@ -48,6 +48,10 @@ export class Player {
     return this.avatar;
   }
 
+  setAvatar(avatar: string) {
+    this.avatar = avatar;
+  }
+
   getHand() {
     return this.handOfCards;
   }

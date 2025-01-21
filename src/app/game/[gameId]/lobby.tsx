@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H4, H6, Muted, P } from "@/components/ui/typography";
 import { useUser } from "@/components/user-context";
-import { startGame } from "@/lib/actions";
+import { startGame, updatePlayer } from "@/lib/actions";
 import { explodingKittenCharacters } from "@/models/characters";
 import { useSocket } from "@/trpc/socket";
 import { useParams } from "next/navigation";
@@ -91,12 +91,17 @@ function RoomCode() {
 
 function LobbyPlayerEditor() {
   const { user, setUser } = useUser();
+  const { gameState } = useGame();
 
   function handleAvatarChange(avatar: string) {
-    setUser({
-      ...user,
-      avatar,
-    });
+    if (gameState?.id) {
+      const updatedPlayer = {
+        ...user,
+        avatar,
+      };
+      setUser(updatedPlayer);
+      updatePlayer(gameState?.id, updatedPlayer);
+    }
   }
 
   return (
@@ -116,6 +121,7 @@ function LobbyPlayerEditor() {
             className="flex h-full flex-col items-center justify-center gap-2"
           >
             <GameAvatar
+              fallback={"A"}
               src={
                 explodingKittenCharacters.find((x) => x.name === user.avatar)
                   ?.img ?? ""

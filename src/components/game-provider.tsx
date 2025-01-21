@@ -64,6 +64,7 @@ export function GameProvider({ children }: GameProviderProps) {
   useEffect(() => {
     const handleDisconnect = () => {
       if (connected && user) {
+        console.log("GAME DISCONNECTED");
         socket.emit(GAME_ACTIONS.DISCONNECT, {
           gameId,
           player: user,
@@ -83,7 +84,7 @@ export function GameProvider({ children }: GameProviderProps) {
       window.removeEventListener("beforeunload", handleDisconnect);
       window.removeEventListener("popstate", handleDisconnect);
     };
-  }, [connected, gameId, user]);
+  }, [connected, gameId]);
 
   useEffect(() => {
     const attemptConnection = () => {

@@ -1,8 +1,10 @@
+import { PlayerData } from "@/models/Player";
 import {
   type DrawCardHandler,
   GAME_ACTIONS,
   type StartGameHandler,
   type PlayCardHandler,
+  UpdatePlayer,
 } from "@/services/GameService";
 import { socket } from "@/trpc/socket";
 
@@ -31,4 +33,13 @@ export function startGame(gameId: string, playerId: string) {
   };
 
   socket.emit(GAME_ACTIONS.START_GAME, startGameObj);
+}
+
+export function updatePlayer(gameId: string, playerData: PlayerData) {
+  const playerDataObj: UpdatePlayer = {
+    gameId,
+    player: playerData,
+  };
+
+  socket.emit(GAME_ACTIONS.UPDATE_PLAYER, playerDataObj);
 }

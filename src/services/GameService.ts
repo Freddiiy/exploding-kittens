@@ -28,6 +28,7 @@ export default class GameService {
       this.handlePlayCard(socket);
       this.handleDrawCard(socket);
       this.handleWantedDisconnect(socket);
+      this.handleUpdatePlayer(socket);
 
       socket.on("disconnect", () => this.handleDisconnectEvent(socket));
     });
@@ -332,6 +333,22 @@ export default class GameService {
     }
   }
 
+  private handleUpdatePlayer(socket: Socket) {
+    socket.on(
+      GAME_ACTIONS.UPDATE_PLAYER,
+      async ({ gameId, player }: UpdatePlayer) => {
+        const game = this.getGame(gameId);
+
+        game
+          .getPlayerManager()
+          .getPlayerById(player.userId)
+          ?.setAvatar(player.avatar);
+
+        this.sendGameState(game.getId());
+      },
+    );
+  }
+
   private getGame(gameId: string) {
     const game = this.games.get(gameId);
 
@@ -396,6 +413,11 @@ export interface PlayerState {
   isPlayersTurn: boolean;
 }
 
+export interface UpdatePlayer {
+  gameId: string;
+  player: PlayerData;
+}
+
 export const GAME_ACTIONS = {
   PLAY_CARD: "playCard",
   DRAW_CARD: "drawCard",
@@ -412,6 +434,7 @@ export const GAME_ACTIONS = {
   GET_ROOMS: "getRooms",
   ERROR: "gameError",
   CLIENT_RESPONSE: "clientResponse",
+  UPDATE_PLAYER: "updatePlayer",
 };
 
 export interface CreateGameHandler {
